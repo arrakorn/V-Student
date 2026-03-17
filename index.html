@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>การเลือกตั้งสภานักเรียน 2568</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Kanit:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+  /* ===== DESIGN TOKENS ===== */
+  :root {
+    --navy:       #0f2044;
+    --navy-mid:   #1a3560;
+    --cobalt:     #1d4ed8;
+    --sky:        #3b82f6;
+    --sky-light:  #bfdbfe;
+    --gold:       #f59e0b;
+    --gold-light: #fef3c7;
+    --cream:      #fafaf7;
+    --white:      #ffffff;
+    --gray-50:    #f8fafc;
+    --gray-100:   #f1f5f9;
+    --gray-200:   #e2e8f0;
+    --gray-400:   #94a3b8;
+    --gray-600:   #475569;
+    --gray-800:   #1e293b;
+    --success:    #059669;
+    --success-bg: #d1fae5;
+    --danger:     #dc2626;
+
+    --shadow-sm:  0 1px 3px rgba(15,32,68,.06), 0 1px 2px rgba(15,32,68,.04);
+    --shadow-md:  0 4px 16px rgba(15,32,68,.08), 0 2px 6px rgba(15,32,68,.05);
+    --shadow-lg:  0 12px 40px rgba(15,32,68,.12), 0 4px 12px rgba(15,32,68,.07);
+    --shadow-xl:  0 24px 64px rgba(15,32,68,.16);
+
+    --radius-sm:  8px;
+    --radius-md:  14px;
+    --radius-lg:  22px;
+    --radius-xl:  32px;
+
+    --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--cream);
+    color: var(--gray-800);
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* ===== ANIMATED BACKGROUND ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 10%, rgba(29,78,216,.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 85% 85%, rgba(245,158,11,.06) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(59,130,246,.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== LAYOUT ===== */
+  #app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== TOP NAV ===== */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(15,32,68,.07);
+    padding: 0 clamp(1rem, 4vw, 2.5rem);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .brand-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--navy), var(--cobalt));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .brand-icon svg { width: 20px; height: 20px; }
+
+  .brand-name {
+    font-family: 'Kanit', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+
+  .brand-name span {
+    display: block;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--gray-400);
+    letter-spacing: .03em;
+  }
+
+  .topbar-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .badge-live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--success-bg);
+    color: var(--success);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+
+  .dot-pulse {
+    width: 7px; height: 7px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 1.8s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .5; transform: scale(1.5); }
+  }
+
+  .voter-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 999px;
+    padding: 5px 14px 5px 6px;
+    font-size: 0.82rem;
+    color: var(--gray-600);
+  }
+
+  .voter-avatar {
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, var(--cobalt), var(--sky));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  /* ===== VIEW SYSTEM ===== */
+  .view {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    animation: fadeUp .35s cubic-bezier(0.4,0,0.2,1) both;
+  }
+
+  .view.active { display: flex; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== LOGIN VIEW ===== */
+  .login-view {
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+  }
+
+  .login-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    padding: clamp(2rem, 5vw, 3.5rem);
+    width: 100%;
+    max-width: 460px;
+    border: 1px solid rgba(255,255,255,.9);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--navy), var(--cobalt), var(--sky));
+  }
+
+  .login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .school-crest {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--navy), var(--cobalt));
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.2rem;
+    box-shadow: 0 8px 24px rgba(29,78,216,.3);
+  }
+
+  .school-crest svg { width: 40px; height: 40px; }
+
+  .login-header h1 {
+    font-family: 'Kanit', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1.3;
+    margin-bottom: .4rem;
+  }
+
+  .login-header p {
+    font-size: 0.92rem;
+    color: var(--gray-600);
+    line-height: 1.7;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: .45rem;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.95rem;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  }
+
+  .form-group input:focus {
+    border-color: var(--cobalt);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(29,78,216,.1);
+  }
+
+  .form-group input.error { border-color: var(--danger); }
+
+  .error-msg {
+    display: none;
+    font-size: 0.8rem;
+    color: var(--danger);
+    margin-top: .3rem;
+    font-weight: 500;
+  }
+
+  .error-msg.show { display: block; }
+
+  .btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--cobalt) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Kanit', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+    box-shadow: 0 4px 14px rgba(29,78,216,.35);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: .01em;
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(29,78,216,.4); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+  .login-note {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--gray-400);
+    line-height: 1.8;
+  }
+
+  .demo-hint {
+    background: var(--gold-light);
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #92400e;
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+  }
+
+  .demo-hint strong { font-weight: 600; }
+
+  /* ===== VOTING VIEW ===== */
+  .voting-view {
+    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2.5rem);
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    gap: 2rem;
+  }
+
+  .voting-header { text-align: center; }
+
+  .voting-header h2 {
+    font-family: 'Kanit', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: .5rem;
+  }
+
+  .voting-header p {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  /* Stepper */
+  .stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: nowrap;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+  }
+
+  .step-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    color: var(--gray-400);
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: all var(--transition);
+    z-index: 1;
+    border: 2px solid var(--gray-200);
+  }
+
+  .step.active .step-dot {
+    background: var(--cobalt);
+    border-color: var(--cobalt);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(29,78,216,.15);
+  }
+
+  .step.done .step-dot {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .step-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--gray-400);
+    white-space: nowrap;
+    letter-spacing: .02em;
+  }
+
+  .step.active .step-label { color: var(--cobalt); font-weight: 600; }
+  .step.done  .step-label  { color: var(--success); }
+
+  .step-line {
+    height: 2px;
+    width: clamp(40px, 8vw, 80px);
+    background: var(--gray-200);
+    margin-bottom: 22px;
+    transition: background var(--transition);
+  }
+
+  .step-line.done { background: var(--success); }
+
+  /* Role tabs */
+  .role-tabs {
+    display: flex;
+    gap: 8px;
+    background: var(--gray-100);
+    padding: 5px;
+    border-radius: var(--radius-md);
+    width: fit-content;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .role-tab {
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .role-tab.active {
+    background: var(--white);
+    color: var(--cobalt);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .role-tab-icon { font-size: 1rem; }
+
+  /* Candidate cards */
+  .candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: 1.2rem;
+  }
+
+  .candidate-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 2px solid transparent;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .candidate-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(29,78,216,.04), transparent);
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+
+  .candidate-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+  .candidate-card:hover::before { opacity: 1; }
+
+  .candidate-card.selected {
+    border-color: var(--cobalt);
+    box-shadow: 0 0 0 4px rgba(29,78,216,.1), var(--shadow-md);
+  }
+
+  .candidate-card.selected::before { opacity: 1; }
+
+  .candidate-check {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    border: 2px solid var(--gray-200);
+    display: flex; align-items: center; justify-content: center;
+    transition: all var(--transition);
+  }
+
+  .candidate-card.selected .candidate-check {
+    background: var(--cobalt);
+    border-color: var(--cobalt);
+  }
+
+  .check-icon {
+    color: white;
+    font-size: 0.9rem;
+    opacity: 0;
+    transform: scale(0);
+    transition: all .2s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .candidate-card.selected .check-icon { opacity: 1; transform: scale(1); }
+
+  .candidate-photo {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  }
+
+  .candidate-name {
+    font-family: 'Kanit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--navy);
+    text-align: center;
+    margin-bottom: .2rem;
+  }
+
+  .candidate-grade {
+    font-size: 0.78rem;
+    color: var(--gray-400);
+    text-align: center;
+    margin-bottom: .8rem;
+    font-weight: 500;
+    letter-spacing: .03em;
+  }
+
+  .candidate-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .tag {
+    background: var(--sky-light);
+    color: var(--cobalt);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+  }
+
+  .candidate-motto {
+    font-size: 0.84rem;
+    color: var(--gray-600);
+    text-align: center;
+    font-style: italic;
+    line-height: 1.7;
+    border-top: 1px solid var(--gray-100);
+    padding-top: .8rem;
+  }
+
+  /* Instruction banner */
+  .instruction-banner {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    color: rgba(255,255,255,.85);
+    border-radius: var(--radius-md);
+    padding: 14px 20px;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.7;
+  }
+
+  .instruction-banner .ib-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .instruction-banner strong { color: white; }
+
+  /* Nav buttons */
+  .ballot-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-nav {
+    padding: 10px 22px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--cobalt);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-nav.back { background: transparent; color: var(--cobalt); }
+  .btn-nav.back:hover { background: rgba(29,78,216,.06); }
+
+  .btn-nav.next {
+    background: var(--cobalt);
+    color: white;
+    border-color: var(--cobalt);
+    box-shadow: 0 4px 12px rgba(29,78,216,.3);
+  }
+
+  .btn-nav.next:hover {
+    background: var(--navy);
+    border-color: var(--navy);
+    box-shadow: 0 6px 18px rgba(15,32,68,.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-nav.next:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .selection-indicator {
+    font-size: 0.88rem;
+    color: var(--gray-600);
+    text-align: center;
+    flex: 1;
+  }
+
+  .selection-indicator strong { color: var(--cobalt); }
+
+  /* ===== REVIEW VIEW ===== */
+  .review-view {
+    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2.5rem);
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+    gap: 1.5rem;
+  }
+
+  .review-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  .review-card-header {
+    background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .review-card-header h3 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+
+  .review-card-header .rch-icon { font-size: 1.2rem; }
+
+  .review-rows { padding: 0 24px; }
+
+  .review-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .review-row:last-child { border-bottom: none; }
+
+  .review-role {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    letter-spacing: .03em;
+    min-width: 95px;
+  }
+
+  .review-candidate {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .review-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .review-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--navy);
+  }
+
+  .review-grade { font-size: 0.75rem; color: var(--gray-400); }
+
+  .review-edit {
+    background: none;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    color: var(--gray-600);
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+    font-weight: 500;
+    transition: all var(--transition);
+  }
+
+  .review-edit:hover { border-color: var(--cobalt); color: var(--cobalt); }
+
+  .pledge-box {
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    font-size: 0.88rem;
+    color: var(--gray-600);
+    line-height: 1.8;
+    display: flex;
+    gap: 12px;
+  }
+
+  .pledge-box input[type="checkbox"] {
+    width: 18px; height: 18px;
+    margin-top: 3px;
+    accent-color: var(--cobalt);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--cobalt), var(--sky));
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Kanit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: 0 6px 20px rgba(29,78,216,.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(29,78,216,.4);
+  }
+
+  .btn-submit:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ===== CONFIRM VIEW ===== */
+  .confirm-view {
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+  }
+
+  .confirm-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    padding: clamp(2.5rem, 6vw, 4rem);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .confirm-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--success), #34d399);
+  }
+
+  .confirm-seal {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--success), #34d399);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 12px 32px rgba(5,150,105,.25);
+    animation: popIn .5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(.4); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .confirm-seal svg { width: 52px; height: 52px; }
+
+  .confirm-card h2 {
+    font-family: 'Kanit', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: .5rem;
+    animation: fadeUp .4s .15s both;
+  }
+
+  .confirm-card p {
+    color: var(--gray-600);
+    font-size: 0.92rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+    animation: fadeUp .4s .25s both;
+  }
+
+  .confirm-ref {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.88rem;
+    color: var(--navy);
+    letter-spacing: .1em;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    animation: fadeUp .4s .3s both;
+  }
+
+  .confirm-ref-label {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    letter-spacing: .04em;
+    font-weight: 500;
+    margin-bottom: .3rem;
+  }
+
+  .confirm-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 2rem;
+    animation: fadeUp .4s .35s both;
+  }
+
+  .cs-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 0.86rem;
+  }
+
+  .cs-role {
+    color: var(--gray-400);
+    font-weight: 500;
+    font-size: 0.78rem;
+  }
+
+  .cs-name { font-weight: 600; color: var(--navy); }
+
+  .btn-logout {
+    width: 100%;
+    padding: 12px;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    animation: fadeUp .4s .45s both;
+  }
+
+  .btn-logout:hover { background: var(--gray-200); color: var(--gray-800); }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    background: var(--navy);
+    color: rgba(255,255,255,.4);
+    text-align: center;
+    padding: 20px;
+    font-size: 0.78rem;
+    margin-top: auto;
+    line-height: 1.8;
+  }
+
+  /* ===== SPINNER ===== */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: inline-block;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== TOAST ===== */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: var(--gray-800);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    animation: toastIn .3s cubic-bezier(0.34,1.56,0.64,1) both;
+    pointer-events: all;
+    white-space: nowrap;
+  }
+
+  .toast.success { background: var(--success); }
+  .toast.error   { background: var(--danger); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(12px) scale(.9); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .topbar-meta .badge-live { display: none; }
+    .ballot-nav { flex-direction: column; }
+    .btn-nav { width: 100%; justify-content: center; }
+    .review-role { min-width: 75px; font-size: .7rem; }
+    .role-tabs { width: 100%; }
+    .role-tab { flex: 1; justify-content: center; font-size: .82rem; padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== TOP BAR ===== -->
+  <nav class="topbar">
+    <a class="topbar-brand" href="#">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="brand-name">
+        โรงเรียนเวสต์บรู๊ค
+        <span>การเลือกตั้งสภานักเรียน</span>
+      </div>
+    </a>
+    <div class="topbar-meta">
+      <div class="badge-live"><div class="dot-pulse"></div>เปิดรับเสียงโหวต</div>
+      <div class="voter-chip" id="voterChip" style="display:none">
+        <div class="voter-avatar" id="voterInitials">–</div>
+        <span id="voterName">–</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ====================================================
+       หน้า 1: เข้าสู่ระบบ
+  ===================================================== -->
+  <main class="view login-view active" id="view-login">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="school-crest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M20 21a8 8 0 10-16 0"/>
+            <path d="M12 12v9"/>
+            <path d="M9 15l3-3 3 3"/>
+          </svg>
+        </div>
+        <h1>ลงคะแนนเสียงเลือกตั้ง</h1>
+        <p>ร่วมกันกำหนดอนาคตของโรงเรียนเรา เสียงของคุณมีความสำคัญ</p>
+      </div>
+
+      <div class="demo-hint">
+        <strong>🎓 ข้อมูลทดสอบระบบ:</strong><br/>
+        รหัสนักเรียน: <code>STU2025</code> &nbsp;·&nbsp; PIN: <code>1234</code>
+      </div>
+
+      <div class="form-group">
+        <label for="inputStudentId">รหัสนักเรียน</label>
+        <input type="text" id="inputStudentId" placeholder="เช่น STU2025" autocomplete="off" maxlength="10"/>
+        <div class="error-msg" id="errStudentId">กรุณากรอกรหัสนักเรียนของคุณ</div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputPin">รหัส PIN</label>
+        <input type="password" id="inputPin" placeholder="PIN 4 หลัก" autocomplete="off" maxlength="4"/>
+        <div class="error-msg" id="errPin">รหัส PIN ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</div>
+      </div>
+
+      <button class="btn-primary" id="btnLogin">
+        เข้าสู่บัตรเลือกตั้ง →
+      </button>
+
+      <div class="login-note">
+        🔒 เข้ารหัสและเป็นความลับ &nbsp;|&nbsp; นักเรียนแต่ละคนลงคะแนนได้ 1 ครั้ง<br/>
+        การเลือกตั้งปิดรับคะแนน <strong>วันศุกร์ที่ 30 พ.ค. เวลา 15:00 น.</strong>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====================================================
+       หน้า 2: ลงคะแนน (หลายขั้นตอน)
+  ===================================================== -->
+  <main class="view voting-view" id="view-voting">
+
+    <div class="voting-header">
+      <h2>บัตรเลือกตั้งอย่างเป็นทางการ</h2>
+      <p>เลือกผู้สมัครหนึ่งคนสำหรับแต่ละตำแหน่งในสภานักเรียน คุณสามารถตรวจสอบการเลือกของคุณก่อนส่ง</p>
+    </div>
+
+    <!-- ตัวแสดงขั้นตอน -->
+    <div class="stepper" id="stepper"></div>
+
+    <!-- แถบคำแนะนำ -->
+    <div class="instruction-banner">
+      <span class="ib-icon">ℹ️</span>
+      <div id="instructionText"><strong>ประธานนักเรียน:</strong> เลือกผู้สมัครที่คุณต้องการให้เป็นประธานสภานักเรียน</div>
+    </div>
+
+    <!-- แถบตำแหน่ง -->
+    <div class="role-tabs" id="roleTabs"></div>
+
+    <!-- กริดผู้สมัคร -->
+    <div class="candidates-grid" id="candidatesGrid"></div>
+
+    <!-- ปุ่มนำทาง -->
+    <div class="ballot-nav">
+      <button class="btn-nav back" id="btnBack">← ย้อนกลับ</button>
+      <div class="selection-indicator" id="selIndicator">เลือกผู้สมัครเพื่อดำเนินการต่อ</div>
+      <button class="btn-nav next" id="btnNext" disabled>ถัดไป →</button>
+    </div>
+
+  </main>
+
+  <!-- ====================================================
+       หน้า 3: ตรวจสอบและยืนยัน
+  ===================================================== -->
+  <main class="view review-view" id="view-review">
+
+    <div class="voting-header" style="text-align:center">
+      <h2 style="font-family:'Kanit',sans-serif;font-size:clamp(1.5rem,4vw,2.1rem);font-weight:600;color:var(--navy);margin-bottom:.5rem">
+        ตรวจสอบบัตรเลือกตั้ง
+      </h2>
+      <p style="color:var(--gray-600);font-size:.95rem;max-width:520px;margin:0 auto;line-height:1.8">
+        กรุณาตรวจสอบการเลือกของคุณอย่างละเอียด เมื่อส่งแล้วจะไม่สามารถเปลี่ยนแปลงได้
+      </p>
+    </div>
+
+    <div class="review-card">
+      <div class="review-card-header">
+        <span class="rch-icon">📋</span>
+        <h3>การเลือกของคุณ</h3>
+      </div>
+      <div class="review-rows" id="reviewRows"></div>
+    </div>
+
+    <div class="pledge-box">
+      <input type="checkbox" id="pledgeCheck"/>
+      <label for="pledgeCheck">
+        ข้าพเจ้า <strong id="pledgeVoterName">ผู้ลงคะแนน</strong> ขอยืนยันว่าการเลือกเหล่านี้เป็นความตั้งใจและความสมัครใจของข้าพเจ้าอย่างแท้จริง ข้าพเจ้าเข้าใจว่าบัตรเลือกตั้งนี้เป็นที่สิ้นสุดและไม่สามารถแก้ไขได้หลังจากการส่ง และขอสาบานตนที่จะรักษาความซื่อสัตย์ของการเลือกตั้งนี้
+      </label>
+    </div>
+
+    <button class="btn-submit" id="btnSubmit" disabled>
+      <span id="submitLabel">🗳️ ส่งบัตรเลือกตั้งอย่างเป็นทางการ</span>
+    </button>
+
+    <button class="btn-nav back" style="width:100%;justify-content:center;margin-top:.5rem" id="btnBackToVoting">← กลับไปบัตรเลือกตั้ง</button>
+
+  </main>
+
+  <!-- ====================================================
+       หน้า 4: ยืนยันการลงคะแนน
+  ===================================================== -->
+  <main class="view confirm-view" id="view-confirm">
+    <div class="confirm-card">
+      <div class="confirm-seal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2>บันทึกคะแนนเรียบร้อยแล้ว!</h2>
+      <p>ขอบคุณที่เข้าร่วม <strong>การเลือกตั้งสภานักเรียนโรงเรียนเวสต์บรู๊ค ปี 2568</strong> คะแนนเสียงของคุณได้รับการบันทึกและนับอย่างปลอดภัยแล้ว</p>
+      <div class="confirm-ref">
+        <div class="confirm-ref-label">หมายเลขอ้างอิงบัตรเลือกตั้ง</div>
+        <div id="refNumber">—</div>
+      </div>
+      <div class="confirm-summary" id="confirmSummary"></div>
+      <button class="btn-logout" id="btnLogout">ออกจากระบบ &amp; กลับหน้าหลัก</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    © 2568 โรงเรียนเวสต์บรู๊ค &nbsp;·&nbsp; สมาคมรัฐบาลนักเรียน &nbsp;·&nbsp; ขับเคลื่อนโดย SecureVote™
+  </footer>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// =====================================================
+//  ข้อมูลระบบ
+// =====================================================
+const VALID_CREDENTIALS = {
+  STU2025: '1234',
+  NAK001:  '9999',
+  SOM002:  '5678'
+};
+
+const VOTER_NAMES = {
+  STU2025: 'นายสมชาย ใจดี',
+  NAK001:  'นางสาวนาค สุขสม',
+  SOM002:  'นายสมศักดิ์ มั่นคง'
+};
+
+const ROLES = [
+  {
+    id: 'president',
+    title: 'ประธาน',
+    icon: '👑',
+    description: 'เลือกผู้สมัครที่คุณต้องการให้เป็นประธานสภานักเรียน',
+  },
+  {
+    id: 'vice_president',
+    title: 'รองประธาน',
+    icon: '🤝',
+    description: 'เลือกผู้สมัครที่คุณต้องการให้เป็นรองประธานสภานักเรียน',
+  },
+  {
+    id: 'secretary',
+    title: 'เลขานุการ',
+    icon: '📝',
+    description: 'เลือกผู้สมัครที่คุณต้องการให้เป็นเลขานุการสภานักเรียน',
+  },
+  {
+    id: 'treasurer',
+    title: 'เหรัญญิก',
+    icon: '💰',
+    description: 'เลือกผู้สมัครที่คุณต้องการให้เป็นเหรัญญิกสภานักเรียน',
+  },
+];
+
+const CANDIDATES = {
+  president: [
+    { id:'p1', name:'นายปิยะ วงศ์สวัสดิ์',    grade:'ม.5', tags:['ความเป็นผู้นำ','ชุมชน','กีฬา'],       motto:'"ร่วมกันเราก้าวไกล — ทุกเสียงสมควรได้รับการฟัง"',       color:'linear-gradient(135deg,#1d4ed8,#3b82f6)', initials:'ป.ว' },
+    { id:'p2', name:'นางสาวกานต์ ศรีสุข',      grade:'ม.6', tags:['นวัตกรรม','เทคโนโลยี','ศิลปะ'],     motto:'"นวัตกรรม ความร่วมมือ และเฉลิมฉลองความแตกต่าง"',        color:'linear-gradient(135deg,#7c3aed,#a78bfa)', initials:'ก.ศ' },
+    { id:'p3', name:'นายธนพล มีสุข',           grade:'ม.5', tags:['ความเท่าเทียม','STEM','โต้วาที'],    motto:'"โรงเรียนที่นักเรียนทุกคนเจริญเติบโตโดยไม่มีข้อยกเว้น"', color:'linear-gradient(135deg,#0f766e,#2dd4bf)', initials:'ธ.ม' },
+    { id:'p4', name:'นางสาวพิมพ์ชนก ดีใจ',    grade:'ม.6', tags:['สุขภาวะ','กิจกรรม','ดนตรี'],       motto:'"นักเรียนมีความสุข โรงเรียนก็มีความสุข — มาสร้างด้วยกัน"', color:'linear-gradient(135deg,#d97706,#fbbf24)', initials:'พ.ด' },
+  ],
+  vice_president: [
+    { id:'v1', name:'นางสาวสุดา รักษ์โลก',    grade:'ม.5', tags:['สิ่งแวดล้อม','ชมรม'],               motto:'"ความยั่งยืนเริ่มต้นในห้องเรียนและทางเดินของเรา"',         color:'linear-gradient(135deg,#059669,#34d399)', initials:'ส.ร' },
+    { id:'v2', name:'นายอิทธิพล บุญมา',        grade:'ม.4', tags:['ระดมทุน','จิตวิญญาณ'],             motto:'"นำพลังงาน เงินทุน และจิตวิญญาณโรงเรียนทุกวัน"',          color:'linear-gradient(135deg,#dc2626,#f87171)', initials:'อ.บ' },
+    { id:'v3', name:'นางสาวอมรา ชื่นชม',       grade:'ม.5', tags:['ความหลากหลาย','สื่อ','ละคร'],      motto:'"เป็นตัวแทนทุกวัฒนธรรมที่ทำให้โรงเรียนเราสวยงาม"',         color:'linear-gradient(135deg,#9333ea,#c084fc)', initials:'อ.ช' },
+  ],
+  secretary: [
+    { id:'s1', name:'นายวีระ จัดการดี',        grade:'ม.4', tags:['การจัดการ','บันทึก','เว็บไซต์'],    motto:'"ความแม่นยำ ความชัดเจน และความโปร่งใสในทุกสิ่ง"',         color:'linear-gradient(135deg,#1d4ed8,#60a5fa)', initials:'ว.จ' },
+    { id:'s2', name:'นางสาวซาร่า อาหมัด',      grade:'ม.5', tags:['การสื่อสาร','จดหมายข่าว'],          motto:'"ทำให้สภาและโรงเรียนของเราได้รับข้อมูลอย่างครบถ้วน"',      color:'linear-gradient(135deg,#be185d,#f472b6)', initials:'ซ.อ' },
+    { id:'s3', name:'นายฟินน์ แอนเดอร์สัน',   grade:'ม.4', tags:['รายงานการประชุม','เทค','ดีไซน์'],  motto:'"บันทึกดิจิทัล ความโปร่งใสจริง — ทุกการประชุม ทุกการโหวต"', color:'linear-gradient(135deg,#0369a1,#38bdf8)', initials:'ฟ.แ' },
+  ],
+  treasurer: [
+    { id:'t1', name:'นางสาวอิสเบล โมโร',      grade:'ม.6', tags:['การเงิน','งบประมาณ','Excel'],       motto:'"ทุกบาทที่บริหารจัดการดีคือโครงการที่เป็นจริง"',           color:'linear-gradient(135deg,#f59e0b,#fcd34d)', initials:'อ.โ' },
+    { id:'t2', name:'นายมาร์คัส เวบ',          grade:'ม.5', tags:['ตรวจสอบ','ระดมทุน'],               motto:'"รับผิดชอบ โปร่งใส และนักเรียนเป็นอันดับแรกเสมอ"',          color:'linear-gradient(135deg,#0f172a,#475569)', initials:'ม.ว' },
+    { id:'t3', name:'นางสาวนาเดีย โควาลสกี้',  grade:'ม.6', tags:['ทุน','กิจกรรม','วางแผน'],          motto:'"ปลดล็อกทรัพยากรที่ทำให้ไอเดียดีๆ เป็นจริง"',             color:'linear-gradient(135deg,#7c3aed,#ddd6fe)', initials:'น.โ' },
+  ],
+};
+
+// =====================================================
+//  STATE
+// =====================================================
+let state = {
+  loggedIn: false,
+  studentId: '',
+  voterName: '',
+  currentStep: 0,
+  selections: {},
+  voted: false,
+};
+
+// =====================================================
+//  UTILITY
+// =====================================================
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg, type = '') {
+  const tc = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function genRefNumber() {
+  return 'WB-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+}
+
+// =====================================================
+//  เข้าสู่ระบบ
+// =====================================================
+document.getElementById('btnLogin').addEventListener('click', handleLogin);
+document.getElementById('inputPin').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
+document.getElementById('inputStudentId').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('inputPin').focus(); });
+
+function handleLogin() {
+  const sid = document.getElementById('inputStudentId').value.trim().toUpperCase();
+  const pin = document.getElementById('inputPin').value.trim();
+  let valid = true;
+
+  document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
+  document.querySelectorAll('#view-login input').forEach(i => i.classList.remove('error'));
+
+  if (!sid) {
+    document.getElementById('errStudentId').classList.add('show');
+    document.getElementById('inputStudentId').classList.add('error');
+    valid = false;
+  }
+
+  if (!VALID_CREDENTIALS[sid] || VALID_CREDENTIALS[sid] !== pin) {
+    document.getElementById('errPin').classList.add('show');
+    document.getElementById('inputPin').classList.add('error');
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  state.studentId   = sid;
+  state.voterName   = VOTER_NAMES[sid] || sid;
+  state.loggedIn    = true;
+  state.selections  = {};
+  state.currentStep = 0;
+
+  // อัปเดต topbar
+  const parts = state.voterName.replace('นาย','').replace('นางสาว','').replace('นาง','').trim().split(' ');
+  const initials = parts.map(w => w[0]).join('').substring(0,2);
+  document.getElementById('voterInitials').textContent = initials;
+  document.getElementById('voterName').textContent = state.voterName;
+  document.getElementById('voterChip').style.display = 'flex';
+  document.getElementById('pledgeVoterName').textContent = state.voterName;
+
+  buildVotingView();
+  showView('view-voting');
+  showToast('ยินดีต้อนรับ ' + state.voterName + '! 🎉', 'success');
+}
+
+// =====================================================
+//  หน้าลงคะแนน
+// =====================================================
+function buildVotingView() {
+  buildStepper();
+  buildRoleTabs();
+  renderStep(state.currentStep);
+}
+
+function buildStepper() {
+  const el = document.getElementById('stepper');
+  el.innerHTML = '';
+  ROLES.forEach((role, i) => {
+    if (i > 0) {
+      const line = document.createElement('div');
+      line.className = 'step-line' + (i <= state.currentStep ? ' done' : '');
+      el.appendChild(line);
+    }
+    const isDone   = (i < state.currentStep) || !!state.selections[role.id];
+    const isActive = (i === state.currentStep);
+    const step = document.createElement('div');
+    step.className = 'step' + (isActive ? ' active' : '') + (isDone && !isActive ? ' done' : '');
+    step.innerHTML = `
+      <div class="step-dot">${isDone && !isActive ? '✓' : (i+1)}</div>
+      <div class="step-label">${role.title}</div>
+    `;
+    el.appendChild(step);
+  });
+}
+
+function buildRoleTabs() {
+  const el = document.getElementById('roleTabs');
+  el.innerHTML = '';
+  ROLES.forEach((role, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'role-tab' + (i === state.currentStep ? ' active' : '');
+    btn.innerHTML = `<span class="role-tab-icon">${role.icon}</span>${role.title}`;
+    btn.addEventListener('click', () => {
+      state.currentStep = i;
+      renderStep(i);
+      buildStepper();
+      buildRoleTabs();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function renderStep(stepIdx) {
+  const role = ROLES[stepIdx];
+  document.getElementById('instructionText').innerHTML =
+    `<strong>${role.icon} ${role.title}:</strong> ${role.description}`;
+
+  const grid = document.getElementById('candidatesGrid');
+  grid.innerHTML = '';
+  const selected = state.selections[role.id];
+
+  CANDIDATES[role.id].forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'candidate-card' + (selected === c.id ? ' selected' : '');
+    card.innerHTML = `
+      <div class="candidate-check"><span class="check-icon">✓</span></div>
+      <div class="candidate-photo" style="background:${c.color}">${c.initials}</div>
+      <div class="candidate-name">${c.name}</div>
+      <div class="candidate-grade">${c.grade}</div>
+      <div class="candidate-tags">${c.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <div class="candidate-motto">${c.motto}</div>
+    `;
+    card.addEventListener('click', () => {
+      state.selections[role.id] = c.id;
+      renderStep(stepIdx);
+      updateNav();
+      buildStepper();
+    });
+    grid.appendChild(card);
+  });
+
+  updateNav();
+}
+
+function updateNav() {
+  const role   = ROLES[state.currentStep];
+  const hasSel = !!state.selections[role.id];
+  const btnNext = document.getElementById('btnNext');
+  const btnBack = document.getElementById('btnBack');
+  const ind     = document.getElementById('selIndicator');
+
+  btnNext.disabled = !hasSel;
+  btnBack.style.visibility = state.currentStep === 0 ? 'hidden' : 'visible';
+
+  if (!hasSel) {
+    ind.innerHTML = 'เลือกผู้สมัครเพื่อดำเนินการต่อ';
+  } else {
+    const c = CANDIDATES[role.id].find(x => x.id === state.selections[role.id]);
+    ind.innerHTML = `เลือก: <strong>${c.name}</strong>`;
+  }
+
+  if (state.currentStep === ROLES.length - 1 && hasSel) {
+    btnNext.textContent = 'ตรวจสอบบัตร →';
+  } else {
+    btnNext.textContent = 'ถัดไป →';
+  }
+}
+
+document.getElementById('btnNext').addEventListener('click', () => {
+  if (state.currentStep < ROLES.length - 1) {
+    state.currentStep++;
+    buildStepper();
+    buildRoleTabs();
+    renderStep(state.currentStep);
+  } else {
+    buildReviewView();
+    showView('view-review');
+  }
+});
+
+document.getElementById('btnBack').addEventListener('click', () => {
+  if (state.currentStep > 0) {
+    state.currentStep--;
+    buildStepper();
+    buildRoleTabs();
+    renderStep(state.currentStep);
+  }
+});
+
+// =====================================================
+//  หน้าตรวจสอบ
+// =====================================================
+function buildReviewView() {
+  const rows = document.getElementById('reviewRows');
+  rows.innerHTML = '';
+
+  ROLES.forEach((role, i) => {
+    const selId = state.selections[role.id];
+    const cand  = CANDIDATES[role.id].find(c => c.id === selId);
+    if (!cand) return;
+
+    const row = document.createElement('div');
+    row.className = 'review-row';
+    row.innerHTML = `
+      <div class="review-role">${role.icon} ${role.title}</div>
+      <div class="review-candidate">
+        <div class="review-avatar" style="background:${cand.color}">${cand.initials}</div>
+        <div>
+          <div class="review-name">${cand.name}</div>
+          <div class="review-grade">${cand.grade}</div>
+        </div>
+      </div>
+      <button class="review-edit" data-step="${i}">แก้ไข</button>
+    `;
+    rows.appendChild(row);
+  });
+
+  document.querySelectorAll('.review-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.currentStep = parseInt(btn.dataset.step);
+      buildStepper();
+      buildRoleTabs();
+      renderStep(state.currentStep);
+      showView('view-voting');
+    });
+  });
+
+  document.getElementById('pledgeCheck').checked = false;
+  document.getElementById('btnSubmit').disabled = true;
+}
+
+document.getElementById('pledgeCheck').addEventListener('change', function() {
+  document.getElementById('btnSubmit').disabled = !this.checked;
+});
+
+document.getElementById('btnBackToVoting').addEventListener('click', () => {
+  showView('view-voting');
+  renderStep(state.currentStep);
+});
+
+// ===== ส่งบัตร =====
+document.getElementById('btnSubmit').addEventListener('click', async () => {
+  const btn   = document.getElementById('btnSubmit');
+  const label = document.getElementById('submitLabel');
+  btn.disabled = true;
+  label.innerHTML = '<span class="spinner"></span> กำลังส่งข้อมูล…';
+
+  await new Promise(r => setTimeout(r, 1800));
+
+  state.voted = true;
+  buildConfirmView();
+  showView('view-confirm');
+});
+
+// =====================================================
+//  หน้ายืนยัน
+// =====================================================
+function buildConfirmView() {
+  document.getElementById('refNumber').textContent = genRefNumber();
+
+  const summary = document.getElementById('confirmSummary');
+  summary.innerHTML = '';
+
+  ROLES.forEach(role => {
+    const selId = state.selections[role.id];
+    const cand  = CANDIDATES[role.id].find(c => c.id === selId);
+    if (!cand) return;
+    const row = document.createElement('div');
+    row.className = 'cs-row';
+    row.innerHTML = `<span class="cs-role">${role.icon} ${role.title}</span><span class="cs-name">${cand.name}</span>`;
+    summary.appendChild(row);
+  });
+}
+
+document.getElementById('btnLogout').addEventListener('click', () => {
+  state = { loggedIn:false, studentId:'', voterName:'', currentStep:0, selections:{}, voted:false };
+  document.getElementById('voterChip').style.display = 'none';
+  document.getElementById('inputStudentId').value = '';
+  document.getElementById('inputPin').value = '';
+  document.getElementById('btnSubmit').disabled = true;
+  document.getElementById('submitLabel').innerHTML = '🗳️ ส่งบัตรเลือกตั้งอย่างเป็นทางการ';
+  showView('view-login');
+  showToast('ออกจากระบบเรียบร้อยแล้ว', '');
+});
+</script>
+</body>
+</html>
