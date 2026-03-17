@@ -1,100 +1,87 @@
-// ─────────────────────────────────────────────
-//  🔥 REPLACE THIS BLOCK WITH YOUR FIREBASE CONFIG
-// ─────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL:       "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
-};
-// ─────────────────────────────────────────────
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// ── UI helpers ──────────────────────────────
-function show(id)   { document.getElementById(id).classList.remove('hidden'); }
-function hide(id)   { document.getElementById(id).classList.add('hidden'); }
-function setError(msg) {
-  const el = document.getElementById('login-error');
-  el.textContent = msg;
+:root {
+    --primary: #6366f1;
+    --secondary: #a855f7;
+    --bg: #0f172a;
+    --glass: rgba(255, 255, 255, 0.1);
 }
 
-// ── State ────────────────────────────────────
-let currentStudentId = null;
-
-// ── LOGIN ────────────────────────────────────
-async function login() {
-  const raw = document.getElementById('student-id').value.trim();
-  setError('');
-
-  if (!raw) {
-    setError('กรุณากรอกรหัสนักเรียน');
-    return;
-  }
-
-  // Basic format check – adjust the regex to match your school's ID format
-  const idPattern = /^\d{5,10}$/;
-  if (!idPattern.test(raw)) {
-    setError('รหัสนักเรียนไม่ถูกต้อง (ตัวเลข 5–10 หลัก)');
-    return;
-  }
-
-  try {
-    // Check if this student has already voted
-    const snap = await db.ref(`votes/${raw}`).get();
-    if (snap.exists()) {
-      setError('รหัสนักเรียนนี้ได้ลงคะแนนแล้ว');
-      return;
-    }
-
-    // All good – proceed to vote screen
-    currentStudentId = raw;
-    hide('login-section');
-    show('vote-section');
-
-  } catch (err) {
-    console.error(err);
-    setError('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
-  }
+body {
+    font-family: 'Kanit', sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    color: white;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
-// Allow pressing Enter in the input to trigger login
-document.getElementById('student-id').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') login();
-});
-
-// ── CAST VOTE ────────────────────────────────
-async function castVote(partyNumber) {
-  if (!currentStudentId) return;
-
-  // Disable all vote buttons to prevent double-taps
-  document.querySelectorAll('.btn-vote, .candidate-card').forEach(el => {
-    el.style.pointerEvents = 'none';
-    el.style.opacity = '0.6';
-  });
-
-  try {
-    // Record that this student voted (value = party number)
-    await db.ref(`votes/${currentStudentId}`).set(partyNumber);
-
-    // Increment the party's tally atomically
-    const tallyRef = db.ref(`tally/party${partyNumber}`);
-    await tallyRef.transaction((current) => (current || 0) + 1);
-
-    hide('vote-section');
-    show('success-section');
-
-  } catch (err) {
-    console.error(err);
-    // Re-enable buttons on failure
-    document.querySelectorAll('.btn-vote, .candidate-card').forEach(el => {
-      el.style.pointerEvents = '';
-      el.style.opacity = '';
-    });
-    alert('เกิดข้อผิดพลาดขณะบันทึกคะแนน กรุณาลองใหม่');
-  }
+.glass-container {
+    width: 90%;
+    max-width: 500px;
 }
+
+.card {
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 2rem;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.hidden { display: none; }
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 1rem 0;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    outline: none;
+}
+
+button {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+    width: 100%;
+}
+
+button:hover { transform: scale(1.02); opacity: 0.9; }
+
+.candidates-grid {
+    display: grid;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.candidate-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.candidate-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary);
+}
+
+.number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.error-msg { color: #f87171; font-size: 0.8rem; }
