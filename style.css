@@ -1,0 +1,294 @@
+/* ════════════════════════════════════════════
+   style.css  ·  StudentVote — สภานักเรียน
+   สไตล์หลัก, แอนิเมชัน และองค์ประกอบที่กำหนดเอง
+════════════════════════════════════════════ */
+
+/* ── ตัวแปร CSS ── */
+:root {
+  --ink:          #0d1117;
+  --slate:        #1c2333;
+  --card:         #161b27;
+  --line:         #2a3347;
+  --muted:        #6b7a99;
+  --light:        #c8d0e7;
+  --snow:         #f0f4ff;
+  --accent:       #4f8ef7;
+  --accent-hover: #3a7de8;
+  --gold:         #f0c060;
+  --teal:         #38e5c0;
+}
+
+/* ── รีเซ็ตพื้นฐาน ── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--ink);
+  color: var(--light);
+  font-family: 'Sarabun', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* ── ตัวช่วยแสดง/ซ่อนหน้าจอ ── */
+.screen { transition: opacity 0.3s ease; }
+.screen.hidden { display: none !important; }
+
+/* ════════════════════════════════
+   พื้นหลังตกแต่ง (Blob)
+════════════════════════════════ */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob-1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(79,142,247,0.18) 0%, transparent 70%);
+  top: -120px;
+  left: -100px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.blob-2 {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(56,229,192,0.12) 0%, transparent 70%);
+  bottom: -80px;
+  right: -80px;
+  animation: float 11s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-24px) scale(1.04); }
+}
+
+/* ════════════════════════════════
+   ไอคอนหมุน (Loading Spinner)
+════════════════════════════════ */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ════════════════════════════════
+   การ์ดผู้สมัคร
+════════════════════════════════ */
+.candidate-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  animation: fadeUp 0.45s ease both;
+}
+
+.candidate-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  border-color: rgba(79,142,247,0.35);
+}
+
+/* แอนิเมชันการ์ดแบบ stagger */
+.candidate-card:nth-child(1) { animation-delay: 0.05s; }
+.candidate-card:nth-child(2) { animation-delay: 0.12s; }
+.candidate-card:nth-child(3) { animation-delay: 0.19s; }
+.candidate-card:nth-child(4) { animation-delay: 0.26s; }
+.candidate-card:nth-child(5) { animation-delay: 0.33s; }
+.candidate-card:nth-child(6) { animation-delay: 0.40s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* รูปโปรไฟล์ผู้สมัคร */
+.candidate-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 2px solid var(--line);
+}
+
+/* ชื่อผู้สมัคร */
+.candidate-name {
+  font-family: 'Sarabun', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--snow);
+  line-height: 1.3;
+}
+
+/* ตำแหน่งที่สมัคร */
+.candidate-role {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(79,142,247,0.1);
+  border: 1px solid rgba(79,142,247,0.2);
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  margin-bottom: 4px;
+}
+
+/* สโลแกน / นโยบายสั้น */
+.candidate-slogan {
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.6;
+  font-style: italic;
+  flex: 1;
+}
+
+/* ════════════════════════════════
+   ปุ่มลงคะแนน
+════════════════════════════════ */
+.btn-vote {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 4px 20px rgba(79,142,247,0.25);
+}
+
+.btn-vote:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 28px rgba(79,142,247,0.38);
+}
+
+.btn-vote:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-vote:disabled {
+  background: var(--slate);
+  color: var(--muted);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.65;
+}
+
+/* การ์ดที่ผู้ใช้เลือก */
+.candidate-card.voted-for {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 1px var(--teal), 0 8px 36px rgba(56,229,192,0.15);
+}
+
+.candidate-card.voted-for .btn-vote {
+  background: var(--teal);
+  color: var(--ink);
+  box-shadow: 0 4px 20px rgba(56,229,192,0.3);
+}
+
+/* ════════════════════════════════
+   แถบผลคะแนน
+════════════════════════════════ */
+.result-row {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  animation: fadeUp 0.4s ease both;
+}
+
+.result-row:nth-child(1) { animation-delay: 0.05s; }
+.result-row:nth-child(2) { animation-delay: 0.10s; }
+.result-row:nth-child(3) { animation-delay: 0.15s; }
+.result-row:nth-child(4) { animation-delay: 0.20s; }
+.result-row:nth-child(5) { animation-delay: 0.25s; }
+.result-row:nth-child(6) { animation-delay: 0.30s; }
+
+/* รางแถบ (track) */
+.result-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+/* แถบที่เต็ม (fill) */
+.result-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--teal));
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 4px;
+}
+
+/* ════════════════════════════════
+   โมดัลยืนยัน
+════════════════════════════════ */
+.scale-up {
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ════════════════════════════════
+   Toast แจ้งเตือน
+════════════════════════════════ */
+#toast {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-hide {
+  opacity: 0;
+  transform: translate(-50%, 16px);
+  pointer-events: none;
+}
+
+.toast-show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+/* ════════════════════════════════
+   แถบเลื่อน (Scrollbar)
+════════════════════════════════ */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: var(--ink); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ════════════════════════════════
+   การปรับสำหรับมือถือ
+════════════════════════════════ */
+@media (max-width: 480px) {
+  .candidate-card { padding: 1.1rem; }
+  .candidate-name { font-size: 1rem; }
+  .blob-1, .blob-2 { width: 280px; height: 280px; }
+}
