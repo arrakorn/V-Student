@@ -1068,3 +1068,20 @@ body::before {
   .role-tabs { width: 100%; }
   .role-tab { flex: 1; justify-content: center; font-size: .82rem; padding: 8px 10px; }
 }
+
+/* ===== FIREBASE STATUS INDICATOR ===== */
+#firebaseStatus {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: .78rem;
+  transition: color .3s;
+}
+#firebaseStatus.ok-status   { color: var(--success); font-weight: 600; }
+#firebaseStatus.warn-status { color: var(--warning); font-weight: 600; }
+#firebaseStatus.err-status  { color: var(--danger);  font-weight: 600; }
+
+/* Error msg — รองรับ multiline */
+.error-msg {
+  white-space: pre-line;
+  line-height: 1.6;
+}
