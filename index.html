@@ -3,62 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบเลือกตั้งสภานักเรียน | CTED CHANDRA</title>
+    <title>ระบบโหวตสภานักเรียน</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="background-shapes"></div>
-
-    <div class="container">
-        <div id="auth-section" class="card active-slide">
-            <div class="header">
-                <h2>🗳️ ระบบเลือกตั้งสภานักเรียน</h2>
-                <p>CTED CHANDRA</p>
-            </div>
-            
-            <div class="form-group">
-                <label for="student-id">รหัสนักเรียน</label>
-                <input type="text" id="student-id" placeholder="กรอกรหัสนักเรียนของคุณ" required>
-            </div>
-            <div class="form-group">
-                <label for="password">รหัสผ่าน</label>
-                <input type="password" id="password" placeholder="ตั้งรหัสผ่าน / กรอกรหัสผ่าน" required>
-            </div>
-            
-            <div class="action-buttons">
-                <button id="btnLogin" class="btn primary">เข้าสู่ระบบ</button>
-                <button id="btnRegister" class="btn secondary">สมัครสมาชิกลงเสียง</button>
-            </div>
-            <p id="auth-message" class="message"></p>
+    <div id="auth-container" class="container active">
+        <h1 class="title">V-STUDENT 🗳️</h1>
+        
+        <div class="tab-container">
+            <button class="tab-btn active" id="tab-login">เข้าสู่ระบบ</button>
+            <button class="tab-btn" id="tab-register">สมัครสมาชิก</button>
         </div>
 
-        <div id="voting-section" class="card hidden">
-            <div class="header">
-                <h2>ยินดีต้อนรับ, ผู้มีสิทธิเลือกตั้ง!</h2>
-                <p>กรุณาเลือกผู้สมัครที่คุณไว้วางใจเพียง 1 พรรค</p>
-            </div>
+        <form id="login-form" class="form-box active">
+            <h2>เข้าสู่ระบบเพื่อลงคะแนน</h2>
+            <input type="text" id="login-id" placeholder="รหัสนักเรียน (เช่น 12345)" required>
+            <input type="password" id="login-password" placeholder="รหัสผ่าน" required>
+            <button type="submit" class="btn primary-btn">เข้าสู่ระบบ</button>
+            <p id="login-error" class="error-msg"></p>
+        </form>
 
-            <div class="candidates-grid">
-                <div class="candidate-card">
-                    <div class="candidate-img number-1">เบอร์ 1</div>
-                    <h3>พรรคก้าวหน้าพัฒนา</h3>
-                    <button class="btn vote-btn" data-candidate="1">โหวตเบอร์ 1</button>
-                </div>
-                <div class="candidate-card">
-                    <div class="candidate-img number-2">เบอร์ 2</div>
-                    <h3>พรรครวมใจเพื่อเรา</h3>
-                    <button class="btn vote-btn" data-candidate="2">โหวตเบอร์ 2</button>
-                </div>
-            </div>
-
-            <div class="logout-section">
-                <button id="btnLogout" class="btn danger">ออกจากระบบ</button>
-            </div>
-        </div>
+        <form id="register-form" class="form-box">
+            <h2>ลงทะเบียนนักเรียนใหม่</h2>
+            <input type="text" id="reg-id" placeholder="รหัสนักเรียน" required>
+            <input type="text" id="reg-name" placeholder="ชื่อ-นามสกุล" required>
+            <input type="password" id="reg-password" placeholder="ตั้งรหัสผ่าน" required>
+            <button type="submit" class="btn secondary-btn">สมัครสมาชิก</button>
+            <p id="reg-error" class="error-msg"></p>
+        </form>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <div id="voting-container" class="container hidden">
+        <div class="header">
+            <h2>ยินดีต้อนรับ, <span id="user-display-name">นักเรียน</span></h2>
+            <button id="logout-btn" class="btn logout-btn">ออกจากระบบ</button>
+        </div>
+        
+        <h1 class="title">เลือกสภานักเรียนในดวงใจ</h1>
+        <p class="subtitle">คุณสามารถลงคะแนนได้เพียง 1 ครั้งเท่านั้น</p>
+
+        <div class="candidates-grid">
+            <div class="candidate-card">
+                <div class="candidate-img">พรรคที่ 1</div>
+                <h3>พรรคก้าวไกลการเรียน</h3>
+                <button class="btn vote-btn" data-candidate="1">โหวตเบอร์ 1</button>
+            </div>
+            <div class="candidate-card">
+                <div class="candidate-img">พรรคที่ 2</div>
+                <h3>พรรคพลังนักเรียน</h3>
+                <button class="btn vote-btn" data-candidate="2">โหวตเบอร์ 2</button>
+            </div>
+            <div class="candidate-card">
+                <div class="candidate-img">พรรคที่ 3</div>
+                <h3>พรรคอนาคตโรงเรียน</h3>
+                <button class="btn vote-btn" data-candidate="3">โหวตเบอร์ 3</button>
+            </div>
+        </div>
+        <p id="vote-status" class="status-msg"></p>
+    </div>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
