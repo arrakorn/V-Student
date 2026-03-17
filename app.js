@@ -1,518 +1,470 @@
-/* ============================================================
-   app.js  ·  StudentVote — ระบบเลือกตั้งสภานักเรียน
-   ภาษา: ไทย  |  Firebase Project: v-student-4a4d6
-   ============================================================ */
+// =========================================================
+// ระบบเลือกตั้งสภานักเรียน — app.js
+// เชื่อมต่อกับ Firebase Firestore
+//
+// โครงสร้างใน Firestore:
+//   collection: "votes"
+//     document: partyId  (เช่น "party-a")
+//       field: count (number) — จำนวนคะแนนสะสม
+//
+//   collection: "voters"
+//     document: studentId  (เช่น "12345")
+//       field: partyId (string) — พรรคที่โหวต
+//       field: votedAt (timestamp) — เวลาที่โหวต
+// =========================================================
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  increment,
+  onSnapshot,
+  collection,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-/* ════════════════════════════════════════════════════════════
-   ①  การตั้งค่า Firebase (เชื่อมต่อกับโปรเจกต์จริงแล้ว)
-   ════════════════════════════════════════════════════════════ */
+/* ---------------------------------------------------------
+   Firebase Configuration
+--------------------------------------------------------- */
 const firebaseConfig = {
-  apiKey: "AIzaSyB4k3-LHtyC6nikVKnDQWPHxy5Z-5t3POo",
-  authDomain: "v-student-4a4d6.firebaseapp.com",
-  projectId: "v-student-4a4d6",
-  storageBucket: "v-student-4a4d6.firebasestorage.app",
+  apiKey:            "AIzaSyB4k3-LHtyC6nikVKnDQWPHxy5Z-5t3POo",
+  authDomain:        "v-student-4a4d6.firebaseapp.com",
+  projectId:         "v-student-4a4d6",
+  storageBucket:     "v-student-4a4d6.firebasestorage.app",
   messagingSenderId: "350774501594",
-  appId: "1:350774501594:web:9330b3b3e36f64c13b05e3",
-  measurementId: "G-4GLGPWDTPP"
+  appId:             "1:350774501594:web:9330b3b3e36f64c13b05e3",
+  measurementId:     "G-4GLGPWDTPP"
+};
 
+// เริ่มต้น Firebase
+const firebaseApp = initializeApp(firebaseConfig);
+const db          = getFirestore(firebaseApp);
 
-/* ════════════════════════════════════════════════════════════
-   ②  ข้อมูลผู้สมัคร — แก้ไขตรงนี้เพื่อเปลี่ยนรายชื่อผู้สมัคร
-   ════════════════════════════════════════════════════════════
-   แต่ละคนมีข้อมูล:
-     id     : รหัสเฉพาะ (ตัวเล็ก ไม่มีเว้นวรรค) ใช้เป็น key ใน Firestore
-     name   : ชื่อ-นามสกุล
-     role   : ตำแหน่งที่สมัคร
-     slogan : สโลแกน / นโยบายสั้น
-     avatar : URL รูปภาพ (ใช้ placeholder ได้)
-   ════════════════════════════════════════════════════════════ */
+/* ---------------------------------------------------------
+   ข้อมูลพรรคและผู้สมัคร
+--------------------------------------------------------- */
 const CANDIDATES = [
   {
-    id:     "somjai_k",
-    name:   "สมใจ กล้าหาญ",
-    role:   "ประธานสภานักเรียน",
-    slogan: "\"พัฒนาโรงเรียนด้วยความโปร่งใส เพราะทุกเสียงของนักเรียนมีความหมาย\"",
-    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=SomjaiK&backgroundColor=b6e3f4"
+    id:        "party-a",
+    partyName: "พรรคเอกภาพ",
+    candidate: "นายอลงกรณ์ ริเวร่า",
+    emoji:     "🌟",
+    tag:       "เอกภาพ · ก้าวหน้า",
+    slogan:    "สร้างโรงเรียนที่ <em>ทุกเสียงได้รับการรับฟัง</em> มุ่งเน้นสุขภาพจิต ชมรมที่ครอบคลุม และการบริหารที่โปร่งใส",
   },
   {
-    id:     "naphat_s",
-    name:   "ณภัทร สุขสบาย",
-    role:   "ประธานสภานักเรียน",
-    slogan: "\"สร้างพื้นที่ปลอดภัย เสริมสิทธิ์นักเรียน และทำให้โรงเรียนน่าอยู่มากขึ้น\"",
-    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=NaphatS&backgroundColor=c0aede"
+    id:        "party-b",
+    partyName: "พรรคนวัตกรรม",
+    candidate: "น.ส.จอร์แดน ลี",
+    emoji:     "🚀",
+    tag:       "เทคโนโลยี · นวัตกรรม",
+    slogan:    "ปรับชีวิตในวิทยาเขตให้ทันสมัยด้วย <em>เครื่องมือดิจิทัล</em> พอร์ทัลนักเรียนใหม่ และพื้นที่ Maker Space",
   },
   {
-    id:     "pimchanok_t",
-    name:   "พิมชนก ทองดี",
-    role:   "รองประธานสภานักเรียน",
-    slogan: "\"เชื่อมสะพานระหว่างนักเรียนกับครู สร้างการเปลี่ยนแปลงที่จับต้องได้\"",
-    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=PimchanokT&backgroundColor=ffd5dc"
+    id:        "party-c",
+    partyName: "พรรคพื้นฐานร่วม",
+    candidate: "น.ส.ปริยา แนร์",
+    emoji:     "🌿",
+    tag:       "สิ่งแวดล้อม · ใส่ใจ",
+    slogan:    "วิทยาเขตสีเขียวและเป็นมิตร ส่งเสริม <em>โครงการรักษ์โลก</em> อาหารราคาประหยัด และระบบพี่เลี้ยงนักเรียน",
   },
   {
-    id:     "thanakrit_p",
-    name:   "ธนกฤต พุทธรักษา",
-    role:   "รองประธานสภานักเรียน",
-    slogan: "\"นวัตกรรมการศึกษา — ร่วมกันออกแบบประสบการณ์โรงเรียนที่ดีกว่าเดิม\"",
-    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=ThanakritP&backgroundColor=d1f4e0"
+    id:        "party-d",
+    partyName: "พรรคอนาคตกล้า",
+    candidate: "นายมาร์คัส เฉิน",
+    emoji:     "⚡",
+    tag:       "ลงมือทำ · ผลลัพธ์",
+    slogan:    "พูดน้อย ทำมาก แผนรูปธรรมเพื่อ <em>สิ่งอำนวยความสะดวกที่ดีขึ้น</em> คิวอาหารที่สั้นลง และกิจการนักเรียน",
   },
   {
-    id:     "wanida_r",
-    name:   "วนิดา รักเรียน",
-    role:   "เลขานุการ",
-    slogan: "\"รับฟังทุกปัญหา บันทึกทุกข้อเสนอ และส่งต่อเสียงของคุณสู่ผู้บริหาร\"",
-    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=WanidaR&backgroundColor=ffe4b5"
+    id:        "party-e",
+    partyName: "พรรคเสียงและความกล้า",
+    candidate: "น.ส.โซเฟีย โอคอนวอ",
+    emoji:     "🎙️",
+    tag:       "วัฒนธรรม · ศิลปะ",
+    slogan:    "ฉลองความหลากหลายผ่าน <em>ศิลปะ วัฒนธรรม และกีฬา</em> กิจกรรมมากขึ้น งบชมรมเพิ่มขึ้น เสียงนักเรียนดังขึ้น",
   },
-  {
-    id:     "krit_w",
-    name:   "กฤต วงศ์ศรี",
-    role:   "เหรัญญิก",
-    slogan: "\"บริหารงบให้คุ้มค่า ทำให้ทุกกิจกรรมเกิดขึ้นจริงเพื่อนักเรียนทุกคน\"",
-    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=KritW&backgroundColor=c0d8f4"
-  }
 ];
 
+/* ---------------------------------------------------------
+   STATE
+--------------------------------------------------------- */
+let currentStudentId  = null; // รหัสนักเรียนที่ล็อกอินอยู่
+let pendingPartyId    = null; // พรรคที่รอยืนยันการโหวต
+let voteCounts        = {};   // แคชคะแนนโหวต { partyId: count }
+let unsubscribeVotes  = null; // ฟังก์ชันยกเลิก real-time listener
 
-/* ════════════════════════════════════════════════════════════
-   ③  เริ่มต้น Firebase
-   ════════════════════════════════════════════════════════════ */
-firebase.initializeApp(firebaseConfig);
+/* ---------------------------------------------------------
+   DOM REFERENCES
+--------------------------------------------------------- */
+const loadingOverlay   = document.getElementById("loading-overlay");
+const firebaseStatus   = document.getElementById("firebase-status");
+const firebaseStatusTx = document.getElementById("firebase-status-text");
 
-// เปิดใช้งาน Analytics (ไม่บังคับ)
-firebase.analytics();
+const views = {
+  login:     document.getElementById("view-login"),
+  dashboard: document.getElementById("view-dashboard"),
+  success:   document.getElementById("view-success"),
+};
 
-const auth      = firebase.auth();
-const db        = firebase.firestore();
+const studentIdInput   = document.getElementById("student-id");
+const idError          = document.getElementById("id-error");
+const btnLogin         = document.getElementById("btn-login");
+const btnLoginText     = document.getElementById("btn-login-text");
+const btnLoginSpinner  = document.getElementById("btn-login-spinner");
+const dashboardAvatar  = document.getElementById("dashboard-avatar");
+const dashboardSID     = document.getElementById("dashboard-student-id");
+const candidateGrid    = document.getElementById("candidate-grid");
 
-/* ── Collections ใน Firestore ──
-   votes/{uid}          → บันทึกว่าแต่ละผู้ใช้โหวตใคร
-   tallies/{candidateId} → นับจำนวนคะแนนแต่ละผู้สมัคร
-────────────────────────────── */
-const votesRef   = db.collection("votes");
-const talliesRef = db.collection("tallies");
+const modal            = document.getElementById("modal");
+const modalPartyName   = document.getElementById("modal-party-name");
+const btnConfirmVote   = document.getElementById("btn-confirm-vote");
+const btnConfirmText   = document.getElementById("btn-confirm-text");
+const btnConfirmSpinner= document.getElementById("btn-confirm-spinner");
+const btnCancelVote    = document.getElementById("btn-cancel-vote");
 
-
-/* ════════════════════════════════════════════════════════════
-   ④  อ้างอิง DOM Elements
-   ════════════════════════════════════════════════════════════ */
-const screenLogin      = document.getElementById("screen-login");
-const screenDashboard  = document.getElementById("screen-dashboard");
-const screenLoading    = document.getElementById("screen-loading");
-
-const btnGoogleLogin   = document.getElementById("btn-google-login");
+const successPartyName = document.getElementById("success-party-name");
 const btnLogout        = document.getElementById("btn-logout");
 
-const userAvatar       = document.getElementById("user-avatar");
-const userName         = document.getElementById("user-name");
-
-const votedBanner      = document.getElementById("voted-banner");
-const candidatesGrid   = document.getElementById("candidates-grid");
-const resultsContainer = document.getElementById("results-container");
-const totalVotesBadge  = document.getElementById("total-votes-badge");
-
-const modalConfirm     = document.getElementById("modal-confirm");
-const modalCandidateEl = document.getElementById("modal-candidate-name");
-const modalCancel      = document.getElementById("modal-cancel");
-const modalConfirmBtn  = document.getElementById("modal-confirm-btn");
-
 const toast            = document.getElementById("toast");
-const toastText        = document.getElementById("toast-text");
+const toastMsg         = document.getElementById("toast-msg");
+const toastIcon        = document.getElementById("toast-icon");
 
-
-/* ════════════════════════════════════════════════════════════
-   ⑤  สถานะแอปพลิเคชัน
-   ════════════════════════════════════════════════════════════ */
-let currentUser    = null;   // ข้อมูลผู้ใช้จาก Firebase
-let pendingVoteId  = null;   // รหัสผู้สมัครที่รอการยืนยัน
-let hasVoted       = false;  // ผู้ใช้โหวตแล้วหรือยัง
-let votedForId     = null;   // รหัสผู้สมัครที่ผู้ใช้โหวตให้
-let talliesUnsub   = null;   // ฟังก์ชันยกเลิก Firestore listener
-
-
-/* ════════════════════════════════════════════════════════════
-   ⑥  จัดการการแสดงหน้าจอ
-   ════════════════════════════════════════════════════════════ */
-function showScreen(name) {
-  screenLogin.classList.add("hidden");
-  screenDashboard.classList.add("hidden");
-  screenLoading.classList.add("hidden");
-
-  if (name === "login")     screenLogin.classList.remove("hidden");
-  if (name === "dashboard") screenDashboard.classList.remove("hidden");
-  if (name === "loading")   screenLoading.classList.remove("hidden");
+/* ---------------------------------------------------------
+   UTILITY: ซ่อน Loading Overlay
+--------------------------------------------------------- */
+function hideLoading() {
+  loadingOverlay.classList.add("hidden");
+  setTimeout(() => { loadingOverlay.style.display = "none"; }, 500);
 }
 
-
-/* ════════════════════════════════════════════════════════════
-   ⑦  การยืนยันตัวตน (Authentication)
-   ════════════════════════════════════════════════════════════ */
-
-/* ── ปุ่มลงชื่อเข้าใช้ด้วย Google ──
-   ใช้ signInWithRedirect แทน Popup เพื่อหลีกเลี่ยงปัญหา
-   browser บล็อก popup และ unauthorized-domain
-────────────────────────────────────── */
-btnGoogleLogin.addEventListener("click", () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
-
-  showScreen("loading");
-
-  // Redirect: พาผู้ใช้ไปหน้า Google แล้วกลับมา
-  auth.signInWithRedirect(provider).catch((err) => {
-    console.error("เกิดข้อผิดพลาดในการล็อกอิน:", err);
-    showScreen("login");
-
-    // แสดง error message ที่เหมาะสม
-    if (err.code === "auth/unauthorized-domain") {
-      showToast("โดเมนนี้ยังไม่ได้รับอนุญาต — ดู console สำหรับรายละเอียด", true);
-      console.error("💡 แก้ไข: ไปที่ Firebase Console → Authentication → Settings → Authorized domains → เพิ่ม domain นี้");
-    } else {
-      showToast("ล็อกอินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", true);
-    }
-  });
-});
-
-/* ── ปุ่มออกจากระบบ ── */
-btnLogout.addEventListener("click", () => {
-  if (talliesUnsub) { talliesUnsub(); talliesUnsub = null; }
-  auth.signOut();
-});
-
-/* ── ตรวจสอบผลลัพธ์หลังจาก Redirect กลับมา ──
-   สำคัญมาก: ต้องเรียกก่อน onAuthStateChanged
-   เพื่อรับ user ที่กลับมาจาก Google หน้า login
-───────────────────────────────────────────── */
-auth.getRedirectResult().then((result) => {
-  // result.user จะมีค่าถ้าเพิ่งกลับมาจาก redirect
-  // onAuthStateChanged จะจัดการต่อเองโดยอัตโนมัติ
-  if (result && result.user) {
-    console.log("✅ Redirect login สำเร็จ:", result.user.displayName);
-  }
-}).catch((err) => {
-  console.error("Redirect result error:", err);
-  if (err.code === "auth/unauthorized-domain") {
-    showScreen("login");
-    showToast("โดเมนนี้ยังไม่ได้รับอนุญาต กรุณาเพิ่มใน Firebase Console", true);
-    console.error("💡 ไปที่: Firebase Console → Authentication → Settings → Authorized domains");
-  }
-});
-
-/* ── ตรวจสอบสถานะการล็อกอินแบบเรียลไทม์ ── */
-auth.onAuthStateChanged(async (user) => {
-  if (user) {
-    // ผู้ใช้ล็อกอินแล้ว
-    currentUser = user;
-    showScreen("loading");
-    await initDashboard(user);
-    showScreen("dashboard");
-  } else {
-    // ผู้ใช้ออกจากระบบแล้ว — รีเซ็ตสถานะ
-    currentUser   = null;
-    hasVoted      = false;
-    votedForId    = null;
-    pendingVoteId = null;
-    if (talliesUnsub) { talliesUnsub(); talliesUnsub = null; }
-    showScreen("login");
-  }
-});
-
-
-/* ════════════════════════════════════════════════════════════
-   ⑧  เริ่มต้นแดชบอร์ด
-   ════════════════════════════════════════════════════════════ */
-async function initDashboard(user) {
-
-  /* -- อัปเดตข้อมูลผู้ใช้ในแถบนำทาง -- */
-  userAvatar.src = user.photoURL || "";
-  userAvatar.classList.toggle("hidden", !user.photoURL);
-  userName.textContent = user.displayName || user.email;
-
-  /* -- ตรวจสอบว่าผู้ใช้เคยโหวตแล้วหรือยัง --
-     โครงสร้าง: votes/{uid} → { candidateId, voterEmail, timestamp }
-  ---------------------------------------------------------------- */
-  try {
-    const voteDoc = await votesRef.doc(user.uid).get();
-    if (voteDoc.exists) {
-      hasVoted   = true;
-      votedForId = voteDoc.data().candidateId;
-    } else {
-      hasVoted   = false;
-      votedForId = null;
-    }
-  } catch (err) {
-    console.error("ไม่สามารถตรวจสอบสถานะการโหวต:", err);
-  }
-
-  /* -- สร้างการ์ดผู้สมัคร -- */
-  renderCandidates();
-
-  /* -- แสดง/ซ่อนแบนเนอร์ -- */
-  votedBanner.classList.toggle("hidden", !hasVoted);
-
-  /* -- เริ่ม listener ผลคะแนนแบบเรียลไทม์ -- */
-  startTalliesListener();
+/* ---------------------------------------------------------
+   UTILITY: อัปเดต Firebase Status Badge
+--------------------------------------------------------- */
+function setFirebaseStatus(state) {
+  // state: "connecting" | "connected" | "error"
+  firebaseStatus.className = "firebase-status " + state;
+  const labels = {
+    connecting: "กำลังเชื่อมต่อ Firebase...",
+    connected:  "เชื่อมต่อ Firebase แล้ว",
+    error:      "ไม่สามารถเชื่อมต่อ Firebase ได้"
+  };
+  firebaseStatusTx.textContent = labels[state] || "";
 }
 
-
-/* ════════════════════════════════════════════════════════════
-   ⑨  สร้างการ์ดผู้สมัคร
-   ════════════════════════════════════════════════════════════ */
-function renderCandidates() {
-  candidatesGrid.innerHTML = "";
-
-  CANDIDATES.forEach((c) => {
-    const isChosenOne = hasVoted && votedForId === c.id;
-
-    const card = document.createElement("div");
-    card.className = `candidate-card${isChosenOne ? " voted-for" : ""}`;
-    card.dataset.id = c.id;
-
-    card.innerHTML = `
-      <div class="flex items-center gap-3">
-        <img src="${c.avatar}" alt="${c.name}" class="candidate-avatar"/>
-        <div>
-          <span class="candidate-role">${c.role}</span>
-          <p class="candidate-name">${c.name}</p>
-        </div>
-      </div>
-
-      <p class="candidate-slogan">${c.slogan}</p>
-
-      <button
-        class="btn-vote"
-        data-id="${c.id}"
-        data-name="${c.name}"
-        ${hasVoted ? "disabled" : ""}
-        aria-label="ลงคะแนนให้ ${c.name}"
-      >
-        ${isChosenOne
-          ? `<span style="display:flex;align-items:center;justify-content:center;gap:6px;">
-               <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-               </svg>
-               คะแนนของคุณ
-             </span>`
-          : "ลงคะแนน"}
-      </button>
-    `;
-
-    candidatesGrid.appendChild(card);
-  });
-
-  /* -- ผูก event กับปุ่มลงคะแนน -- */
-  candidatesGrid.querySelectorAll(".btn-vote").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (hasVoted) return;
-      openConfirmModal(btn.dataset.id, btn.dataset.name);
-    });
-  });
+/* ---------------------------------------------------------
+   UTILITY: สลับหน้า
+--------------------------------------------------------- */
+function showView(name) {
+  Object.values(views).forEach(v => v.classList.remove("active"));
+  views[name].classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-
-/* ════════════════════════════════════════════════════════════
-   ⑩  โมดัลยืนยันการลงคะแนน
-   ════════════════════════════════════════════════════════════ */
-function openConfirmModal(candidateId, candidateName) {
-  pendingVoteId = candidateId;
-  modalCandidateEl.textContent = candidateName;
-  modalConfirm.classList.remove("hidden");
-}
-
-function closeConfirmModal() {
-  pendingVoteId = null;
-  modalConfirm.classList.add("hidden");
-}
-
-/* ปุ่มยกเลิก */
-modalCancel.addEventListener("click", closeConfirmModal);
-
-/* คลิก backdrop เพื่อปิดโมดัล */
-modalConfirm.addEventListener("click", (e) => {
-  if (e.target === modalConfirm || e.target.classList.contains("modal-backdrop")) {
-    closeConfirmModal();
-  }
-});
-
-/* ── ปุ่มยืนยันการลงคะแนน ── */
-modalConfirmBtn.addEventListener("click", async () => {
-  if (!pendingVoteId || !currentUser) return;
-
-  const candidateId = pendingVoteId;
-  closeConfirmModal();
-
-  // ปิดปุ่มทันที (Optimistic UI) เพื่อป้องกันการกดซ้ำ
-  hasVoted = true;
-  disableAllVoteButtons();
-
-  try {
-    /* ══════════════════════════════════════════════════════════
-       FIRESTORE TRANSACTION (การเขียนแบบ Atomic)
-       ─────────────────────────────────────────────────────────
-       ใช้ Transaction เพื่อความปลอดภัยสูงสุด:
-         1. อ่าน votes/{uid} ก่อน
-         2. ถ้ามีอยู่แล้ว → ยุติ (โหวตแล้ว)
-         3. ถ้าไม่มี → บันทึกคะแนน + เพิ่มตัวนับ tallies
-
-       โครงสร้าง Firestore:
-         votes/{uid}           → { candidateId, voterEmail, timestamp }
-         tallies/{candidateId} → { count: <จำนวน> }
-    ═══════════════════════════════════════════════════════════ */
-    await db.runTransaction(async (tx) => {
-      const voteRef  = votesRef.doc(currentUser.uid);
-      const tallyRef = talliesRef.doc(candidateId);
-
-      const existingVote = await tx.get(voteRef);
-
-      // ตรวจสอบซ้ำอีกครั้ง: ถ้าโหวตแล้วให้หยุด
-      if (existingVote.exists) {
-        throw new Error("ALREADY_VOTED");
-      }
-
-      // 1. บันทึกการโหวตของผู้ใช้คนนี้
-      tx.set(voteRef, {
-        candidateId:  candidateId,
-        voterEmail:   currentUser.email,
-        voterName:    currentUser.displayName || "",
-        timestamp:    firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      // 2. เพิ่มคะแนนให้ผู้สมัคร (atomic increment)
-      tx.set(tallyRef, {
-        count: firebase.firestore.FieldValue.increment(1)
-      }, { merge: true }); // merge: true สร้าง document ถ้ายังไม่มี
-    });
-
-    /* -- โหวตสำเร็จ -- */
-    votedForId = candidateId;
-    renderCandidates();   // วาดการ์ดใหม่ (แสดงป้าย "คะแนนของคุณ")
-    votedBanner.classList.remove("hidden");
-    showToast("🗳️  ลงคะแนนเสร็จสมบูรณ์แล้ว ขอบคุณ!");
-
-  } catch (err) {
-    if (err.message === "ALREADY_VOTED") {
-      showToast("คุณได้ลงคะแนนไปแล้ว ไม่สามารถโหวตซ้ำได้", true);
-      votedBanner.classList.remove("hidden");
-    } else {
-      console.error("เกิดข้อผิดพลาดขณะโหวต:", err);
-      // คืนค่า — อนุญาตให้ลองใหม่
-      hasVoted = false;
-      renderCandidates();
-      showToast("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง", true);
-    }
-  }
-});
-
-
-/* ════════════════════════════════════════════════════════════
-   ⑪  ปิดปุ่มลงคะแนนทั้งหมด
-   ════════════════════════════════════════════════════════════ */
-function disableAllVoteButtons() {
-  candidatesGrid.querySelectorAll(".btn-vote").forEach((btn) => {
-    btn.disabled = true;
-  });
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   ⑫  Listener ผลคะแนนแบบเรียลไทม์ (Firestore onSnapshot)
-   ════════════════════════════════════════════════════════════ */
-function startTalliesListener() {
-  // ยกเลิก listener เก่าก่อน (ถ้ามี)
-  if (talliesUnsub) talliesUnsub();
-
-  /* -- สร้างแถบผลคะแนนเริ่มต้น -- */
-  resultsContainer.innerHTML = "";
-
-  CANDIDATES.forEach((c) => {
-    const row = document.createElement("div");
-    row.className = "result-row";
-    row.id = `result-${c.id}`;
-    row.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:4px;">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-          <img src="${c.avatar}" alt="${c.name}"
-            style="width:28px;height:28px;border-radius:8px;border:1px solid var(--line);object-fit:cover;flex-shrink:0;"/>
-          <span style="color:var(--light);font-size:0.875rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name}</span>
-          <span style="font-size:0.7rem;color:var(--muted);flex-shrink:0;">${c.role}</span>
-        </div>
-        <span id="count-${c.id}"
-          style="color:var(--accent);font-weight:700;font-size:0.875rem;font-variant-numeric:tabular-nums;flex-shrink:0;">
-          0
-        </span>
-      </div>
-      <div class="result-bar-track">
-        <div id="bar-${c.id}" class="result-bar-fill" style="width:0%"></div>
-      </div>
-    `;
-    resultsContainer.appendChild(row);
-  });
-
-  /* -- Subscribe รับอัปเดตแบบ live -- */
-  talliesUnsub = talliesRef.onSnapshot((snapshot) => {
-    const counts = {};
-
-    // รวบรวมคะแนนจาก snapshot
-    snapshot.forEach((doc) => {
-      counts[doc.id] = doc.data().count || 0;
-    });
-
-    // คำนวณคะแนนรวม
-    const total = Object.values(counts).reduce((sum, v) => sum + v, 0);
-
-    // อัปเดต badge จำนวนคะแนนทั้งหมด
-    totalVotesBadge.textContent = `${total.toLocaleString("th-TH")} คะแนนเสียง`;
-
-    // อัปเดตแถบและตัวเลขของผู้สมัครแต่ละคน
-    CANDIDATES.forEach((c) => {
-      const count   = counts[c.id] || 0;
-      const percent = total > 0 ? Math.round((count / total) * 100) : 0;
-
-      const countEl = document.getElementById(`count-${c.id}`);
-      const barEl   = document.getElementById(`bar-${c.id}`);
-
-      if (countEl) countEl.textContent = count.toLocaleString("th-TH");
-      if (barEl)   barEl.style.width   = `${percent}%`;
-    });
-
-  }, (err) => {
-    console.error("Listener ผลคะแนนมีปัญหา:", err);
-  });
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   ⑬  Toast แจ้งเตือน
-   ════════════════════════════════════════════════════════════ */
+/* ---------------------------------------------------------
+   UTILITY: Toast แจ้งเตือน
+--------------------------------------------------------- */
 let toastTimer = null;
-
-function showToast(message, isError = false) {
-  toastText.textContent = message;
-
-  // เปลี่ยนสีตามประเภท (สำเร็จ = teal, ผิดพลาด = แดง)
-  toast.style.color       = isError ? "#f87171" : "var(--teal)";
-  toast.style.borderColor = isError ? "rgba(248,113,113,0.3)" : "rgba(56,229,192,0.3)";
-
-  toast.classList.remove("toast-hide");
-  toast.classList.add("toast-show");
-
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    toast.classList.remove("toast-show");
-    toast.classList.add("toast-hide");
-  }, 4000);
+function showToast(message, type = "error") {
+  toastMsg.textContent = message;
+  toastIcon.textContent = type === "error" ? "⚠️" : "✓";
+  toast.className = "toast show " + (type === "error" ? "error" : "success-toast");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 3500);
 }
 
+/* ---------------------------------------------------------
+   UTILITY: เปิด/ปิด loading state บนปุ่ม
+--------------------------------------------------------- */
+function setBtnLoading(textEl, spinnerEl, btnEl, isLoading) {
+  btnEl.disabled = isLoading;
+  spinnerEl.style.display = isLoading ? "block" : "none";
+  textEl.style.opacity = isLoading ? "0.5" : "1";
+}
 
-/* ════════════════════════════════════════════════════════════
-   ⑭  กด Escape เพื่อปิดโมดัล
-   ════════════════════════════════════════════════════════════ */
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !modalConfirm.classList.contains("hidden")) {
-    closeConfirmModal();
+/* ---------------------------------------------------------
+   FIREBASE: ตรวจสอบว่านักเรียนคนนี้โหวตแล้วหรือยัง
+--------------------------------------------------------- */
+async function hasVotedFirebase(studentId) {
+  const ref  = doc(db, "voters", String(studentId));
+  const snap = await getDoc(ref);
+  return snap.exists();
+}
+
+/* ---------------------------------------------------------
+   FIREBASE: บันทึกการโหวต (Atomic)
+   - เพิ่ม 1 คะแนนให้พรรค (increment)
+   - บันทึก voter record
+--------------------------------------------------------- */
+async function recordVoteFirebase(studentId, partyId) {
+  const partyRef = doc(db, "votes", partyId);
+  const voterRef = doc(db, "voters", String(studentId));
+
+  // เพิ่มคะแนนพรรค (ถ้ายังไม่มี doc ให้สร้างใหม่)
+  await setDoc(partyRef, { count: increment(1) }, { merge: true });
+
+  // บันทึกว่านักเรียนคนนี้โหวตแล้ว
+  await setDoc(voterRef, {
+    partyId,
+    votedAt: serverTimestamp()
+  });
+
+  console.log(`✅ บันทึกคะแนนสำเร็จ: นักเรียน ${studentId} → ${partyId}`);
+}
+
+/* ---------------------------------------------------------
+   FIREBASE: Subscribe real-time vote counts
+   อัปเดต vote bar ทุกครั้งที่มีการโหวตใหม่
+--------------------------------------------------------- */
+function subscribeVoteCounts() {
+  const votesCol = collection(db, "votes");
+  unsubscribeVotes = onSnapshot(votesCol, (snapshot) => {
+    snapshot.forEach(docSnap => {
+      voteCounts[docSnap.id] = docSnap.data().count || 0;
+    });
+    updateVoteBars();
+    console.log("📊 คะแนน real-time:", voteCounts);
+  });
+}
+
+/* ---------------------------------------------------------
+   UI: อัปเดต Vote Bar บนการ์ดทุกใบ
+--------------------------------------------------------- */
+function updateVoteBars() {
+  const total = Object.values(voteCounts).reduce((s, v) => s + v, 0);
+  CANDIDATES.forEach(c => {
+    const fillEl  = document.getElementById(`bar-fill-${c.id}`);
+    const countEl = document.getElementById(`bar-count-${c.id}`);
+    if (!fillEl || !countEl) return;
+    const count   = voteCounts[c.id] || 0;
+    const pct     = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+    fillEl.style.width  = pct + "%";
+    countEl.textContent = `${count} เสียง (${pct}%)`;
+  });
+}
+
+/* ---------------------------------------------------------
+   UI: สร้างการ์ดผู้สมัคร
+--------------------------------------------------------- */
+function buildCandidateGrid() {
+  candidateGrid.innerHTML = "";
+  CANDIDATES.forEach(c => {
+    const card = document.createElement("div");
+    card.className = `candidate-card ${c.id}`;
+    card.innerHTML = `
+      <div class="card-banner">
+        <div class="candidate-avatar">${c.emoji}</div>
+      </div>
+      <div class="card-body">
+        <span class="party-tag">${c.tag}</span>
+        <h3 class="party-name">${c.partyName}</h3>
+        <p class="candidate-name">ผู้สมัคร: ${c.candidate}</p>
+        <p class="card-slogan">${c.slogan}</p>
+
+        <!-- Vote bar แสดงคะแนน real-time -->
+        <div class="vote-bar-wrap">
+          <div class="vote-bar-label">
+            <span>คะแนนสะสม</span>
+            <span id="bar-count-${c.id}">0 เสียง (0%)</span>
+          </div>
+          <div class="vote-bar-track">
+            <div class="vote-bar-fill" id="bar-fill-${c.id}"></div>
+          </div>
+        </div>
+
+        <button class="btn-vote" data-party-id="${c.id}" data-party-name="${c.partyName}">
+          <span>เลือก${c.partyName}</span>
+        </button>
+      </div>
+    `;
+    candidateGrid.appendChild(card);
+  });
+
+  // ผูก event กับปุ่มโหวต
+  candidateGrid.querySelectorAll(".btn-vote").forEach(btn => {
+    btn.addEventListener("click", handleVoteClick);
+  });
+
+  // อัปเดต bar ทันทีด้วยข้อมูลที่แคชไว้
+  updateVoteBars();
+}
+
+/* ---------------------------------------------------------
+   EVENT: เข้าสู่ระบบ
+--------------------------------------------------------- */
+btnLogin.addEventListener("click", async () => {
+  const sid = studentIdInput.value.trim();
+
+  // validation
+  if (!sid) {
+    showFieldError("กรุณากรอกรหัสนักเรียน");
+    return;
+  }
+  if (!/^\d{5,12}$/.test(sid)) {
+    showFieldError("รหัสนักเรียนต้องเป็นตัวเลขอย่างน้อย 5 หลัก");
+    return;
+  }
+  clearFieldError();
+
+  // loading state
+  setBtnLoading(btnLoginText, btnLoginSpinner, btnLogin, true);
+
+  try {
+    // ตรวจสอบจาก Firestore ว่าโหวตแล้วหรือยัง
+    const alreadyVoted = await hasVotedFirebase(sid);
+    if (alreadyVoted) {
+      showToast("รหัสนักเรียนนี้เคยลงคะแนนแล้ว", "error");
+      setBtnLoading(btnLoginText, btnLoginSpinner, btnLogin, false);
+      return;
+    }
+
+    // ผ่านการตรวจสอบ → ไปหน้า dashboard
+    currentStudentId = sid;
+    dashboardSID.textContent = sid;
+    dashboardAvatar.textContent = sid.charAt(0);
+
+    buildCandidateGrid();
+    showView("dashboard");
+
+  } catch (err) {
+    console.error("Login error:", err);
+    showToast("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง", "error");
+  } finally {
+    setBtnLoading(btnLoginText, btnLoginSpinner, btnLogin, false);
   }
 });
 
+// กด Enter เพื่อ Login
+studentIdInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") btnLogin.click();
+});
 
-/* ════════════════════════════════════════════════════════════
-   จบ app.js
-   ════════════════════════════════════════════════════════════ */
+/* ---------------------------------------------------------
+   EVENT: คลิกปุ่มโหวต → เปิด Modal
+--------------------------------------------------------- */
+function handleVoteClick(e) {
+  pendingPartyId = e.currentTarget.dataset.partyId;
+  modalPartyName.textContent = e.currentTarget.dataset.partyName;
+  modal.classList.add("open");
+}
+
+/* ---------------------------------------------------------
+   EVENT: Modal — ยืนยันการโหวต
+--------------------------------------------------------- */
+btnConfirmVote.addEventListener("click", async () => {
+  if (!pendingPartyId || !currentStudentId) return;
+
+  const party = CANDIDATES.find(c => c.id === pendingPartyId);
+  setBtnLoading(btnConfirmText, btnConfirmSpinner, btnConfirmVote, true);
+  btnCancelVote.disabled = true;
+
+  try {
+    await recordVoteFirebase(currentStudentId, pendingPartyId);
+
+    successPartyName.textContent = `คุณเลือก${party.partyName}`;
+    modal.classList.remove("open");
+    showView("success");
+    resetCheckmark();
+    showToast("บันทึกเสียงสำเร็จ!", "success");
+
+  } catch (err) {
+    console.error("Vote error:", err);
+    // อาจเกิดจาก race condition (2 คนโหวตพร้อมกัน) ให้ตรวจซ้ำ
+    try {
+      const alreadyVoted = await hasVotedFirebase(currentStudentId);
+      if (alreadyVoted) {
+        showToast("รหัสนักเรียนนี้เคยลงคะแนนแล้ว", "error");
+        modal.classList.remove("open");
+        showView("login");
+      } else {
+        showToast("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง", "error");
+      }
+    } catch {
+      showToast("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง", "error");
+    }
+  } finally {
+    setBtnLoading(btnConfirmText, btnConfirmSpinner, btnConfirmVote, false);
+    btnCancelVote.disabled = false;
+  }
+});
+
+/* ---------------------------------------------------------
+   EVENT: Modal — ยกเลิก
+--------------------------------------------------------- */
+btnCancelVote.addEventListener("click", closeModal);
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+function closeModal() {
+  modal.classList.remove("open");
+  pendingPartyId = null;
+}
+
+/* ---------------------------------------------------------
+   EVENT: ออกจากระบบ
+--------------------------------------------------------- */
+btnLogout.addEventListener("click", () => {
+  currentStudentId = null;
+  pendingPartyId   = null;
+  studentIdInput.value = "";
+  clearFieldError();
+  showView("login");
+});
+
+/* ---------------------------------------------------------
+   UTILITY: Field Error
+--------------------------------------------------------- */
+function showFieldError(msg) {
+  idError.textContent = msg;
+  idError.classList.add("show");
+  studentIdInput.style.borderColor = "var(--red)";
+}
+function clearFieldError() {
+  idError.classList.remove("show");
+  studentIdInput.style.borderColor = "";
+}
+
+/* ---------------------------------------------------------
+   UTILITY: Reset Checkmark Animation
+--------------------------------------------------------- */
+function resetCheckmark() {
+  const ring  = document.querySelector(".checkmark-circle");
+  const check = document.querySelector(".checkmark-check");
+  [ring, check].forEach(el => {
+    el.style.animation = "none";
+    void el.offsetHeight;
+    el.style.animation = "";
+  });
+}
+
+/* ---------------------------------------------------------
+   INIT: เริ่มต้นระบบ
+--------------------------------------------------------- */
+async function init() {
+  setFirebaseStatus("connecting");
+  try {
+    // ทดสอบการเชื่อมต่อโดยดึงข้อมูลจาก Firestore
+    await getDoc(doc(db, "votes", "party-a"));
+    setFirebaseStatus("connected");
+
+    // เริ่ม subscribe real-time vote counts
+    subscribeVoteCounts();
+
+    console.log("🔥 Firebase เชื่อมต่อสำเร็จ");
+  } catch (err) {
+    console.error("Firebase connection error:", err);
+    setFirebaseStatus("error");
+    showToast("ไม่สามารถเชื่อมต่อ Firebase ได้ ลองรีโหลดหน้า", "error");
+  } finally {
+    hideLoading();
+  }
+}
+
+// เริ่มต้นแอป
+init();
+
+// ยกเลิก listener เมื่อปิดหน้า
+window.addEventListener("beforeunload", () => {
+  if (unsubscribeVotes) unsubscribeVotes();
+});
