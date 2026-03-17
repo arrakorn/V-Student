@@ -8,14 +8,13 @@
    ①  การตั้งค่า Firebase (เชื่อมต่อกับโปรเจกต์จริงแล้ว)
    ════════════════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey:            "AIzaSyB4k3-LHtyC6nikVKnDQWPHxy5Z-5t3POo",
-  authDomain:        "v-student-4a4d6.firebaseapp.com",
-  projectId:         "v-student-4a4d6",
-  storageBucket:     "v-student-4a4d6.firebasestorage.app",
+  apiKey: "AIzaSyB4k3-LHtyC6nikVKnDQWPHxy5Z-5t3POo",
+  authDomain: "v-student-4a4d6.firebaseapp.com",
+  projectId: "v-student-4a4d6",
+  storageBucket: "v-student-4a4d6.firebasestorage.app",
   messagingSenderId: "350774501594",
-  appId:             "1:350774501594:web:0d4249981f805e563b05e3",
-  measurementId:     "G-QNKHK7T7SF"
-};
+  appId: "1:350774501594:web:9330b3b3e36f64c13b05e3",
+  measurementId: "G-4GLGPWDTPP"
 
 
 /* ════════════════════════════════════════════════════════════
