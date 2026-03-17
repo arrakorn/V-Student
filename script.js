@@ -5,13 +5,13 @@ import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/fireb
 
 // Config ที่คุณให้มา
 const firebaseConfig = {
-  apiKey: "AIzaSyBALBRccsCoSgadd26glq8kjCVzYVjpRjQ",
-  authDomain: "arakonapp.firebaseapp.com",
-  projectId: "arakonapp",
-  storageBucket: "arakonapp.firebasestorage.app",
-  messagingSenderId: "377162906533",
-  appId: "1:377162906533:web:dcc6197b28cf961431464c",
-  measurementId: "G-WYRJZD0ZMG"
+  apiKey: "AIzaSyB4k3-LHtyC6nikVKnDQWPHxy5Z-5t3POo",
+  authDomain: "v-student-4a4d6.firebaseapp.com",
+  projectId: "v-student-4a4d6",
+  storageBucket: "v-student-4a4d6.firebasestorage.app",
+  messagingSenderId: "350774501594",
+  appId: "1:350774501594:web:0d4249981f805e563b05e3",
+  measurementId: "G-QNKHK7T7SF"
 };
 
 // Initialize Firebase
