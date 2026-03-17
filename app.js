@@ -148,18 +148,28 @@ function showScreen(name) {
    ⑦  การยืนยันตัวตน (Authentication)
    ════════════════════════════════════════════════════════════ */
 
-/* ── ปุ่มลงชื่อเข้าใช้ด้วย Google ── */
+/* ── ปุ่มลงชื่อเข้าใช้ด้วย Google ──
+   ใช้ signInWithRedirect แทน Popup เพื่อหลีกเลี่ยงปัญหา
+   browser บล็อก popup และ unauthorized-domain
+────────────────────────────────────── */
 btnGoogleLogin.addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  // บังคับให้แสดงหน้าเลือกบัญชีทุกครั้ง
   provider.setCustomParameters({ prompt: "select_account" });
 
   showScreen("loading");
 
-  auth.signInWithRedirect(provider) => {
+  // Redirect: พาผู้ใช้ไปหน้า Google แล้วกลับมา
+  auth.signInWithRedirect(provider).catch((err) => {
     console.error("เกิดข้อผิดพลาดในการล็อกอิน:", err);
     showScreen("login");
-    showToast("ล็อกอินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", true);
+
+    // แสดง error message ที่เหมาะสม
+    if (err.code === "auth/unauthorized-domain") {
+      showToast("โดเมนนี้ยังไม่ได้รับอนุญาต — ดู console สำหรับรายละเอียด", true);
+      console.error("💡 แก้ไข: ไปที่ Firebase Console → Authentication → Settings → Authorized domains → เพิ่ม domain นี้");
+    } else {
+      showToast("ล็อกอินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", true);
+    }
   });
 });
 
@@ -167,6 +177,25 @@ btnGoogleLogin.addEventListener("click", () => {
 btnLogout.addEventListener("click", () => {
   if (talliesUnsub) { talliesUnsub(); talliesUnsub = null; }
   auth.signOut();
+});
+
+/* ── ตรวจสอบผลลัพธ์หลังจาก Redirect กลับมา ──
+   สำคัญมาก: ต้องเรียกก่อน onAuthStateChanged
+   เพื่อรับ user ที่กลับมาจาก Google หน้า login
+───────────────────────────────────────────── */
+auth.getRedirectResult().then((result) => {
+  // result.user จะมีค่าถ้าเพิ่งกลับมาจาก redirect
+  // onAuthStateChanged จะจัดการต่อเองโดยอัตโนมัติ
+  if (result && result.user) {
+    console.log("✅ Redirect login สำเร็จ:", result.user.displayName);
+  }
+}).catch((err) => {
+  console.error("Redirect result error:", err);
+  if (err.code === "auth/unauthorized-domain") {
+    showScreen("login");
+    showToast("โดเมนนี้ยังไม่ได้รับอนุญาต กรุณาเพิ่มใน Firebase Console", true);
+    console.error("💡 ไปที่: Firebase Console → Authentication → Settings → Authorized domains");
+  }
 });
 
 /* ── ตรวจสอบสถานะการล็อกอินแบบเรียลไทม์ ── */
