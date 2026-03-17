@@ -3,67 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบโหวตสภานักเรียน</title>
+    <title>ระบบโหวตสภานักเรียน | V-Student</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="background-shapes"></div>
 
-    <div id="auth-container" class="container active">
-        <h1 class="title">V-STUDENT 🗳️</h1>
-        
-        <div class="tab-container">
-            <button class="tab-btn active" id="tab-login">เข้าสู่ระบบ</button>
-            <button class="tab-btn" id="tab-register">สมัครสมาชิก</button>
+    <div class="container">
+        <div id="auth-section" class="card fade-in">
+            <h1 id="auth-title">เข้าสู่ระบบ</h1>
+            <p id="auth-subtitle">เพื่อร่วมโหวตสภานักเรียน</p>
+            
+            <form id="auth-form">
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="อีเมล" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="รหัสผ่าน" required>
+                </div>
+                <button type="submit" class="btn-primary" id="auth-btn">เข้าสู่ระบบ</button>
+            </form>
+            
+            <p class="toggle-text">
+                <span id="toggle-hint">ยังไม่มีบัญชีใช่ไหม?</span> 
+                <a href="#" id="toggle-auth">สมัครสมาชิกเลย</a>
+            </p>
+            <div id="auth-error" class="error-msg"></div>
         </div>
 
-        <form id="login-form" class="form-box active">
-            <h2>เข้าสู่ระบบเพื่อลงคะแนน</h2>
-            <input type="text" id="login-id" placeholder="รหัสนักเรียน (เช่น 12345)" required>
-            <input type="password" id="login-password" placeholder="รหัสผ่าน" required>
-            <button type="submit" class="btn primary-btn">เข้าสู่ระบบ</button>
-            <p id="login-error" class="error-msg"></p>
-        </form>
-
-        <form id="register-form" class="form-box">
-            <h2>ลงทะเบียนนักเรียนใหม่</h2>
-            <input type="text" id="reg-id" placeholder="รหัสนักเรียน" required>
-            <input type="text" id="reg-name" placeholder="ชื่อ-นามสกุล" required>
-            <input type="password" id="reg-password" placeholder="ตั้งรหัสผ่าน" required>
-            <button type="submit" class="btn secondary-btn">สมัครสมาชิก</button>
-            <p id="reg-error" class="error-msg"></p>
-        </form>
+        <div id="vote-section" class="card fade-in hidden" style="max-width: 800px;">
+            <div class="header">
+                <h2>เลือกตั้งสภานักเรียน 🗳️</h2>
+                <button id="logout-btn" class="btn-secondary">ออกจากระบบ</button>
+            </div>
+            <p id="user-display">ยินดีต้อนรับ</p>
+            
+            <div id="voting-area">
+                <h3 class="vote-title">โปรดเลือกพรรคที่คุณชื่นชอบ</h3>
+                <div class="candidates-grid">
+                    <div class="candidate-card">
+                        <div class="number-badge">1</div>
+                        <h3>พรรคก้าวไกล(ในโรงเรียน)</h3>
+                        <p>นโยบาย: พัฒนาโรงอาหาร เพิ่มเมนูน้ำปั่น</p>
+                        <button class="btn-vote" data-id="party_1">โหวตเบอร์ 1</button>
+                    </div>
+                    <div class="candidate-card">
+                        <div class="number-badge">2</div>
+                        <h3>พรรคพลังนักเรียน</h3>
+                        <p>นโยบาย: กีฬาสีจัดเต็ม เพิ่มวันหยุดหลังสอบ</p>
+                        <button class="btn-vote" data-id="party_2">โหวตเบอร์ 2</button>
+                    </div>
+                </div>
+                <div id="vote-status" class="success-msg hidden"></div>
+            </div>
+        </div>
     </div>
 
-    <div id="voting-container" class="container hidden">
-        <div class="header">
-            <h2>ยินดีต้อนรับ, <span id="user-display-name">นักเรียน</span></h2>
-            <button id="logout-btn" class="btn logout-btn">ออกจากระบบ</button>
-        </div>
-        
-        <h1 class="title">เลือกสภานักเรียนในดวงใจ</h1>
-        <p class="subtitle">คุณสามารถลงคะแนนได้เพียง 1 ครั้งเท่านั้น</p>
-
-        <div class="candidates-grid">
-            <div class="candidate-card">
-                <div class="candidate-img">พรรคที่ 1</div>
-                <h3>พรรคก้าวไกลการเรียน</h3>
-                <button class="btn vote-btn" data-candidate="1">โหวตเบอร์ 1</button>
-            </div>
-            <div class="candidate-card">
-                <div class="candidate-img">พรรคที่ 2</div>
-                <h3>พรรคพลังนักเรียน</h3>
-                <button class="btn vote-btn" data-candidate="2">โหวตเบอร์ 2</button>
-            </div>
-            <div class="candidate-card">
-                <div class="candidate-img">พรรคที่ 3</div>
-                <h3>พรรคอนาคตโรงเรียน</h3>
-                <button class="btn vote-btn" data-candidate="3">โหวตเบอร์ 3</button>
-            </div>
-        </div>
-        <p id="vote-status" class="status-msg"></p>
-    </div>
-
-    <script type="module" src="script.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
