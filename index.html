@@ -2,244 +2,186 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>StudentVote — เลือกตั้งสภานักเรียน</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบเลือกตั้งสภานักเรียน</title>
 
-  <!-- ฟอนต์ภาษาไทย Sarabun + Playfair Display -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Syne (display) + Sarabun (ภาษาไทย) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap"
+    rel="stylesheet"
+  />
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            display: ['Playfair Display', 'serif'],
-            body:    ['Sarabun', 'sans-serif'],
-          },
-          colors: {
-            ink:         '#0d1117',
-            slate:       '#1c2333',
-            card:        '#161b27',
-            line:        '#2a3347',
-            muted:       '#6b7a99',
-            light:       '#c8d0e7',
-            snow:        '#f0f4ff',
-            accent:      '#4f8ef7',
-            accentHover: '#3a7de8',
-            gold:        '#f0c060',
-            teal:        '#38e5c0',
-          },
-          boxShadow: {
-            glow: '0 0 40px rgba(79,142,247,0.18)',
-            card: '0 4px 32px rgba(0,0,0,0.35)',
-          }
-        }
-      }
-    }
-  </script>
-
+  <!-- CSS แยกไฟล์ -->
   <link rel="stylesheet" href="style.css" />
 </head>
+<body>
 
-<body class="bg-ink text-light font-body antialiased min-h-screen">
-
-  <!-- ══════════════════════════════════════════
-       หน้า 1 · ล็อกอิน / หน้าแรก
-  ══════════════════════════════════════════ -->
-  <div id="screen-login" class="screen min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
-
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-
-    <div class="relative z-10 text-center max-w-md w-full">
-
-      <!-- แบดจ์ -->
-      <span class="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent bg-accent/10 border border-accent/20 rounded-full px-4 py-1.5 mb-8">
-        การเลือกตั้งสภานักเรียน · ปีการศึกษา 2568
-      </span>
-
-      <!-- หัวเรื่องหลัก -->
-      <h1 class="font-display text-5xl sm:text-6xl font-bold text-snow leading-tight mb-4">
-        เสียงของคุณ<br/>
-        <span class="text-accent">สำคัญที่สุด</span>
-      </h1>
-
-      <p class="text-muted text-base sm:text-lg mb-10 leading-relaxed">
-        ลงชื่อเข้าใช้ด้วย Gmail ของโรงเรียน เพื่อเข้าสู่ระบบลงคะแนนที่ปลอดภัย<br/>
-        นักเรียนแต่ละคนมีสิทธิ์ลงคะแนนได้เพียง <strong class="text-snow">1 ครั้งเท่านั้น</strong>
-      </p>
-
-      <!-- ปุ่มลงชื่อเข้าใช้ Google -->
-      <button id="btn-google-login"
-        class="group w-full flex items-center justify-center gap-3 bg-snow text-ink font-semibold text-base rounded-2xl px-6 py-4 shadow-glow hover:bg-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0">
-        <!-- ไอคอน Google -->
-        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        <span>เข้าสู่ระบบด้วย Google</span>
-        <svg class="w-4 h-4 opacity-40 group-hover:opacity-70 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-      </button>
-
-      <p class="text-muted text-xs mt-5 leading-relaxed">
-        การลงชื่อเข้าใช้ถือว่าคุณยอมรับข้อกำหนดการเลือกตั้งของโรงเรียน<br/>ผลการลงคะแนนมีผลสมบูรณ์และไม่สามารถเปลี่ยนแปลงได้
-      </p>
+  <!-- =========================================================
+       LOADING OVERLAY (แสดงระหว่างเชื่อมต่อ Firebase)
+  ========================================================= -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-logo">🗳️</div>
+    <p class="loading-text">กำลังเชื่อมต่อ Firebase...</p>
+    <div class="loading-bar">
+      <div class="loading-bar-fill"></div>
     </div>
-
-    <p class="absolute bottom-6 text-muted/40 text-xs tracking-widest uppercase">
-      รักษาความปลอดภัยโดย Firebase · StudentVote v1.0
-    </p>
   </div>
 
+  <!-- พื้นหลังแอนิเมชัน -->
+  <div class="bg-mesh" aria-hidden="true"></div>
 
-  <!-- ══════════════════════════════════════════
-       หน้า 2 · แดชบอร์ดลงคะแนน
-  ══════════════════════════════════════════ -->
-  <div id="screen-dashboard" class="screen hidden min-h-screen flex flex-col">
-
-    <!-- แถบนำทางด้านบน -->
-    <nav class="sticky top-0 z-40 bg-ink/80 backdrop-blur-lg border-b border-line">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
-
-        <!-- โลโก้ -->
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <span class="font-display text-snow text-lg font-bold tracking-tight">StudentVote</span>
-        </div>
-
-        <!-- ข้อมูลผู้ใช้ + ปุ่มออกจากระบบ -->
-        <div class="flex items-center gap-3">
-          <img id="user-avatar" src="" alt="รูปโปรไฟล์" class="w-8 h-8 rounded-full border-2 border-line object-cover hidden sm:block"/>
-          <span id="user-name" class="text-light text-sm font-medium hidden sm:block truncate max-w-[140px]"></span>
-          <button id="btn-logout"
-            class="text-xs text-muted hover:text-snow border border-line hover:border-muted rounded-lg px-3 py-1.5 transition-all">
-            ออกจากระบบ
-          </button>
-        </div>
-      </div>
-    </nav>
-
-    <!-- เนื้อหาหลัก -->
-    <main class="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-10">
-
-      <!-- หัวเรื่อง -->
-      <div class="mb-10">
-        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-accent mb-2">สภานักเรียน · ปีการศึกษา 2568</p>
-        <h2 class="font-display text-3xl sm:text-4xl font-bold text-snow">ลงคะแนนเสียงของคุณ</h2>
-        <p class="text-muted mt-2 text-sm sm:text-base">ศึกษานโยบายของผู้สมัครแต่ละคน แล้วเลือกผู้ที่คุณเชื่อว่าจะเป็นตัวแทนที่ดีที่สุดของนักเรียน</p>
-      </div>
-
-      <!-- แบนเนอร์แจ้งว่าลงคะแนนแล้ว (ซ่อนไว้ก่อน) -->
-      <div id="voted-banner" class="hidden mb-8 flex items-start gap-4 bg-teal/10 border border-teal/30 text-teal rounded-2xl px-5 py-4">
-        <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <div>
-          <p class="font-semibold text-sm">บันทึกเสียงของคุณแล้ว!</p>
-          <p class="text-teal/70 text-xs mt-0.5">คุณได้ลงคะแนนเสียงเรียบร้อยแล้ว ปุ่มลงคะแนนทั้งหมดถูกปิดใช้งานแล้ว ขอบคุณที่ร่วมออกเสียงเลือกตั้ง!</p>
-        </div>
-      </div>
-
-      <!-- กริดการ์ดผู้สมัคร -->
-      <div id="candidates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
-        <!-- การ์ดผู้สมัครจะถูกสร้างโดย app.js -->
-      </div>
-
-      <!-- ส่วนแสดงผลคะแนนแบบเรียลไทม์ -->
-      <div class="border-t border-line pt-10">
-        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-          <div>
-            <p class="text-xs font-semibold tracking-[0.15em] uppercase text-accent mb-1">ผลคะแนนสด</p>
-            <h3 class="font-display text-2xl font-bold text-snow">ผลการลงคะแนนแบบเรียลไทม์</h3>
-          </div>
-          <span id="total-votes-badge" class="text-xs font-semibold bg-line text-light rounded-full px-3 py-1.5">0 คะแนนเสียง</span>
-        </div>
-
-        <!-- แถบผลคะแนน -->
-        <div id="results-container" class="space-y-4">
-          <!-- แถบผลคะแนนจะถูกสร้างโดย app.js -->
-        </div>
-      </div>
-
-    </main>
-
-    <!-- ท้ายหน้า -->
-    <footer class="border-t border-line mt-8 py-5 text-center text-muted/50 text-xs">
-      StudentVote &copy; 2568 · รักษาความปลอดภัยโดย Firebase · คะแนนเสียงมีผลสมบูรณ์และเป็นความลับ
-    </footer>
+  <!-- Toast แจ้งเตือน -->
+  <div class="toast" id="toast" role="alert" aria-live="polite">
+    <span class="toast-icon" id="toast-icon"></span>
+    <span id="toast-msg"></span>
   </div>
 
-
-  <!-- ══════════════════════════════════════════
-       หน้า 3 · กำลังโหลด / ตรวจสอบตัวตน
-  ══════════════════════════════════════════ -->
-  <div id="screen-loading" class="screen hidden fixed inset-0 bg-ink/90 backdrop-blur z-50 flex flex-col items-center justify-center gap-4">
-    <div class="spinner"></div>
-    <p class="text-muted text-sm animate-pulse">กำลังตรวจสอบตัวตน…</p>
-  </div>
-
-
-  <!-- ══════════════════════════════════════════
-       โมดัลยืนยันการลงคะแนน
-  ══════════════════════════════════════════ -->
-  <div id="modal-confirm" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div class="modal-backdrop absolute inset-0 bg-ink/70 backdrop-blur-sm"></div>
-    <div class="relative bg-card border border-line rounded-3xl shadow-card p-8 max-w-sm w-full text-center z-10 scale-up">
-      <div class="w-14 h-14 rounded-full bg-accent/15 flex items-center justify-center mx-auto mb-5">
-        <svg class="w-7 h-7 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
-        </svg>
-      </div>
-      <h3 class="font-display text-snow text-xl font-bold mb-2">ยืนยันการลงคะแนน</h3>
-      <p class="text-muted text-sm mb-1">คุณกำลังจะลงคะแนนให้กับ:</p>
-      <p id="modal-candidate-name" class="text-snow font-semibold text-lg mb-6"></p>
-      <p class="text-muted/70 text-xs mb-6">การกระทำนี้ <strong class="text-light">ถาวรและไม่สามารถยกเลิกได้</strong><br/>นักเรียนแต่ละคนสามารถลงคะแนนได้เพียงครั้งเดียว</p>
-      <div class="flex gap-3">
-        <button id="modal-cancel"
-          class="flex-1 py-3 rounded-xl border border-line text-muted hover:text-snow hover:border-muted transition-all text-sm font-medium">
-          ยกเลิก
-        </button>
-        <button id="modal-confirm-btn"
-          class="flex-1 py-3 rounded-xl bg-accent hover:bg-accentHover text-white font-semibold text-sm transition-all shadow-glow">
-          ยืนยันลงคะแนน
+  <!-- =========================================================
+       MODAL ยืนยันการโหวต
+  ========================================================= -->
+  <div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-icon">🗳️</div>
+      <h2 class="modal-title" id="modal-title">ยืนยันการเลือก</h2>
+      <p class="modal-desc">
+        คุณแน่ใจหรือไม่ว่าต้องการเลือก <strong id="modal-party-name"></strong>?
+        การกระทำนี้<em>ไม่สามารถยกเลิกได้</em>
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="btn-cancel-vote">ยกเลิก</button>
+        <button class="btn btn-primary" id="btn-confirm-vote">
+          <span class="btn-spinner" id="btn-confirm-spinner" style="display:none;
+            width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);
+            border-top-color:#fff;border-radius:50%;
+            animation:spin 0.7s linear infinite;"></span>
+          <span id="btn-confirm-text">ยืนยันการเลือก</span>
         </button>
       </div>
     </div>
   </div>
 
+  <!-- =========================================================
+       MAIN APP
+  ========================================================= -->
+  <div id="app">
 
-  <!-- ══════════════════════════════════════════
-       Toast แจ้งเตือน
-  ══════════════════════════════════════════ -->
-  <div id="toast" class="toast-hide fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate border border-teal/30 text-teal text-sm font-medium rounded-2xl px-5 py-3 shadow-card pointer-events-none">
-    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-    </svg>
-    <span id="toast-text">ลงคะแนนเสร็จสมบูรณ์!</span>
-  </div>
+    <!-- Badge หัวข้อ -->
+    <div class="header-badge">
+      <span class="dot"></span>
+      การเลือกตั้งสภานักเรียน ปีการศึกษา 2568
+    </div>
 
+    <!-- =====================================================
+         VIEW 1: หน้าเข้าสู่ระบบ
+    ===================================================== -->
+    <div class="view active" id="view-login">
+      <div class="card">
+        <div class="login-icon">🗳️</div>
+        <h1 class="login-title">ลงคะแนนเสียงของคุณ</h1>
+        <p class="login-sub">
+          กรอกรหัสนักเรียนเพื่อเข้าสู่ระบบเลือกตั้งที่ปลอดภัย
+          คะแนนเสียงของคุณเป็นความลับและบันทึกใน Firebase
+        </p>
 
-  <!-- ══════════════════════════════════════════
-       Firebase SDKs (v10 compat mode)
-  ══════════════════════════════════════════ -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+        <!-- Firebase connection status -->
+        <div class="firebase-status connecting" id="firebase-status">
+          <span class="status-dot"></span>
+          <span id="firebase-status-text">กำลังเชื่อมต่อ Firebase...</span>
+        </div>
 
-  <!-- ไฟล์ JavaScript หลัก -->
-  <script src="app.js"></script>
+        <div class="field-group">
+          <label class="field-label" for="student-id">รหัสนักเรียน</label>
+          <input
+            class="field-input"
+            type="text"
+            id="student-id"
+            placeholder="เช่น 12345"
+            maxlength="12"
+            autocomplete="off"
+            inputmode="numeric"
+          />
+          <span class="field-error" id="id-error"></span>
+        </div>
+
+        <button class="btn btn-primary" id="btn-login">
+          <span class="btn-spinner" id="btn-login-spinner" style="display:none;
+            width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);
+            border-top-color:#fff;border-radius:50%;
+            animation:spin 0.7s linear infinite;"></span>
+          <span id="btn-login-text">เข้าสู่ระบบเลือกตั้ง →</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- =====================================================
+         VIEW 2: แดชบอร์ดเลือกตั้ง
+    ===================================================== -->
+    <div class="view" id="view-dashboard">
+
+      <div class="dashboard-header">
+        <h2 class="dashboard-title">เลือกพรรคที่คุณต้องการ</h2>
+        <p class="dashboard-sub">
+          ศึกษานโยบายของแต่ละพรรคอย่างละเอียดแล้วลงคะแนนเสียงเพียงหนึ่งเสียง
+          คะแนนจะอัปเดตแบบ Real-time ผ่าน Firebase
+        </p>
+        <div class="student-pill">
+          <span class="avatar" id="dashboard-avatar">?</span>
+          <span>เข้าสู่ระบบด้วยรหัสนักเรียน&nbsp;<strong id="dashboard-student-id"></strong></span>
+        </div>
+      </div>
+
+      <!-- การ์ดพรรคถูกสร้างโดย JavaScript -->
+      <div class="candidate-grid" id="candidate-grid"></div>
+
+    </div>
+
+    <!-- =====================================================
+         VIEW 3: หน้าสำเร็จ
+    ===================================================== -->
+    <div class="view" id="view-success">
+      <div class="card">
+        <div class="success-ring">
+          <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark-circle" cx="26" cy="26" r="23"/>
+            <path  class="checkmark-check"  d="M14 27 l8 8 l16-18"/>
+          </svg>
+        </div>
+
+        <h2 class="success-title">บันทึกเสียงสำเร็จ! 🎉</h2>
+        <p class="success-sub">
+          ขอบคุณที่ร่วมใช้สิทธิ์เลือกตั้งสภานักเรียน
+          เสียงของคุณถูกบันทึกใน Firebase แล้ว
+        </p>
+
+        <div class="voted-party-badge">
+          <span>✓</span>
+          <span id="success-party-name"></span>
+        </div>
+
+        <p class="success-sub" style="font-size:13px; margin-bottom:24px;">
+          ผลการเลือกตั้งจะประกาศเมื่อสิ้นสุดระยะเวลาการลงคะแนน
+        </p>
+
+        <button class="btn btn-secondary" id="btn-logout" style="width:100%;">
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+
+    <div class="footer">
+      ระบบเลือกตั้งสภานักเรียน &nbsp;·&nbsp;
+      ขับเคลื่อนโดย <strong style="color:var(--accent-2)">Firebase Firestore</strong>
+    </div>
+
+  </div><!-- /#app -->
+
+  <!-- =========================================================
+       JavaScript แยกไฟล์ (ES Module)
+       ต้องใช้ type="module" เพื่อ import Firebase SDK
+  ========================================================= -->
+  <script type="module" src="app.js"></script>
+
 </body>
 </html>
