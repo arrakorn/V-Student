@@ -1,101 +1,166 @@
-// Firebase Configuration (เชื่อมต่อตามที่คุณครูให้มา)
+// นำเข้าฟังก์ชันที่จำเป็นจาก Firebase SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+// Config ที่คุณให้มา
 const firebaseConfig = {
-    apiKey: "AIzaSyBALBRccsCoSgadd26glq8kjCVzYVjpRjQ",
-    authDomain: "arakonapp.firebaseapp.com",
-    projectId: "arakonapp",
-    storageBucket: "arakonapp.firebasestorage.app",
-    messagingSenderId: "377162906533",
-    appId: "1:377162906533:web:dcc6197b28cf961431464c",
-    measurementId: "G-WYRJZD0ZMG"
+  apiKey: "AIzaSyBALBRccsCoSgadd26glq8kjCVzYVjpRjQ",
+  authDomain: "arakonapp.firebaseapp.com",
+  projectId: "arakonapp",
+  storageBucket: "arakonapp.firebasestorage.app",
+  messagingSenderId: "377162906533",
+  appId: "1:377162906533:web:dcc6197b28cf961431464c",
+  measurementId: "G-WYRJZD0ZMG"
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-let loggedInUser = null;
+// โดเมนจำลองสำหรับการล็อกอินด้วยรหัสนักเรียน
+const SCHOOL_DOMAIN = "@student.cted.chandra.edu"; 
 
-// สลับหน้า Login / Signup
-function switchTab(type) {
-    document.getElementById('login-form').classList.toggle('hidden', type === 'signup');
-    document.getElementById('signup-form').classList.toggle('hidden', type === 'login');
-    document.getElementById('tab-login').classList.toggle('active', type === 'login');
-    document.getElementById('tab-signup').classList.toggle('active', type === 'signup');
+// ดึง Elements ต่างๆ จาก DOM
+const authSection = document.getElementById('auth-section');
+const votingSection = document.getElementById('voting-section');
+const txtStudentId = document.getElementById('student-id');
+const txtPassword = document.getElementById('password');
+const btnLogin = document.getElementById('btnLogin');
+const btnRegister = document.getElementById('btnRegister');
+const btnLogout = document.getElementById('btnLogout');
+const authMessage = document.getElementById('auth-message');
+const voteButtons = document.querySelectorAll('.vote-btn');
+
+// ฟังก์ชันสำหรับสลับหน้าจอ
+function showSection(sectionToShow) {
+    authSection.classList.remove('active-slide');
+    votingSection.classList.remove('active-slide');
+    
+    setTimeout(() => {
+        authSection.classList.add('hidden');
+        votingSection.classList.add('hidden');
+        
+        sectionToShow.classList.remove('hidden');
+        setTimeout(() => sectionToShow.classList.add('active-slide'), 50);
+    }, 300); // รอให้แอนิเมชันเดิมเฟดออกก่อน
 }
 
-// 1. ระบบลงทะเบียน (Sign Up)
-function handleSignUp() {
-    const sid = document.getElementById('reg-sid').value;
-    const name = document.getElementById('reg-name').value;
-    const pass = document.getElementById('reg-pass').value;
+// ติดตามสถานะการล็อกอิน
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // ล็อกอินแล้ว ให้ไปหน้าโหวต
+        showSection(votingSection);
+        checkIfVoted(user.uid);
+    } else {
+        // ยังไม่ล็อกอิน ให้อยู่หน้า auth
+        showSection(authSection);
+    }
+});
 
-    if(!sid || !name || !pass) {
-        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+// ฟังก์ชันสมัครสมาชิก
+btnRegister.addEventListener('click', () => {
+    const studentId = txtStudentId.value.trim();
+    const password = txtPassword.value;
+
+    if(!studentId || !password) {
+        authMessage.innerText = "กรุณากรอกรหัสนักเรียนและรหัสผ่านให้ครบถ้วน";
         return;
     }
 
-    // ตรวจสอบว่ามีรหัสนักเรียนนี้หรือยัง
-    db.ref('users/' + sid).once('value', snapshot => {
-        if (snapshot.exists()) {
-            alert("รหัสนักเรียนนี้ถูกลงทะเบียนไปแล้ว");
-        } else {
-            db.ref('users/' + sid).set({
-                fullName: name,
-                password: pass,
-                hasVoted: false
-            }).then(() => {
-                alert("ลงทะเบียนสำเร็จ! เข้าสู่ระบบได้เลย");
-                switchTab('login');
+    const email = studentId + SCHOOL_DOMAIN;
+
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            authMessage.style.color = "green";
+            authMessage.innerText = "สมัครสมาชิกสำเร็จ! กำลังเข้าสู่ระบบ...";
+            // บันทึกข้อมูลเบื้องต้นลง Firestore
+            setDoc(doc(db, "users", userCredential.user.uid), {
+                studentId: studentId,
+                hasVoted: false,
+                votedFor: null
             });
-        }
-    });
-}
-
-// 2. ระบบเข้าสู่ระบบ (Login)
-function handleLogin() {
-    const sid = document.getElementById('login-sid').value;
-    const pass = document.getElementById('login-pass').value;
-
-    db.ref('users/' + sid).once('value', snapshot => {
-        const userData = snapshot.val();
-        if (userData && userData.password === pass) {
-            if (userData.hasVoted) {
-                alert("คุณได้ใช้สิทธิ์ไปแล้ว ไม่สามารถโหวตซ้ำได้");
+        })
+        .catch((error) => {
+            authMessage.style.color = "red";
+            if(error.code === 'auth/email-already-in-use') {
+                authMessage.innerText = "รหัสนักเรียนนี้ถูกลงทะเบียนไปแล้ว";
+            } else if (error.code === 'auth/weak-password') {
+                authMessage.innerText = "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
             } else {
-                loggedInUser = { sid, ...userData };
-                showVotePage();
+                authMessage.innerText = "เกิดข้อผิดพลาด: " + error.message;
             }
-        } else {
-            document.getElementById('auth-msg').innerText = "รหัสผ่านไม่ถูกต้อง หรือ ไม่พบชื่อผู้ใช้";
-        }
-    });
-}
-
-function showVotePage() {
-    document.getElementById('auth-card').classList.add('hidden');
-    document.getElementById('vote-card').classList.remove('hidden');
-    document.getElementById('display-user').innerText = `👤 ${loggedInUser.fullName}`;
-}
-
-// 3. ระบบโหวต (Vote)
-function selectCandidate(no, name) {
-    if (confirm(`ยืนยันการโหวตให้ ${name} (เบอร์ ${no}) ?`)) {
-        // อัปเดตสถานะผู้ใช้ว่าโหวตแล้ว
-        db.ref('users/' + loggedInUser.sid).update({ hasVoted: true });
-        
-        // บันทึกคะแนนลง Summary
-        db.ref('results/no' + no).transaction(current => (current || 0) + 1);
-        
-        // เก็บ Log การโหวต (เพื่อตรวจสอบ)
-        db.ref('vote_logs').push({
-            student_id: loggedInUser.sid,
-            candidate_no: no,
-            timestamp: ServerValue.TIMESTAMP
         });
+});
 
-        document.getElementById('vote-card').classList.add('hidden');
-        document.getElementById('finish-card').classList.remove('hidden');
+// ฟังก์ชันเข้าสู่ระบบ
+btnLogin.addEventListener('click', () => {
+    const studentId = txtStudentId.value.trim();
+    const password = txtPassword.value;
+    const email = studentId + SCHOOL_DOMAIN;
+
+    signInWithEmailAndPassword(auth, email, password)
+        .catch((error) => {
+            authMessage.style.color = "red";
+            authMessage.innerText = "รหัสนักเรียน หรือ รหัสผ่านไม่ถูกต้อง";
+        });
+});
+
+// ฟังก์ชันออกจากระบบ
+btnLogout.addEventListener('click', () => {
+    signOut(auth).then(() => {
+        txtStudentId.value = '';
+        txtPassword.value = '';
+        authMessage.innerText = '';
+    });
+});
+
+// ตรวจสอบว่าเคยโหวตแล้วหรือยัง
+async function checkIfVoted(uid) {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists() && docSnap.data().hasVoted) {
+        disableVoting("คุณได้ทำการลงคะแนนไปแล้ว ขอบคุณครับ!");
     }
 }
 
-const ServerValue = firebase.database.ServerValue;
+// ฟังก์ชันบันทึกการโหวต
+voteButtons.forEach(button => {
+    button.addEventListener('click', async (e) => {
+        const candidateNo = e.target.getAttribute('data-candidate');
+        const user = auth.currentUser;
+
+        if (user) {
+            const confirmVote = confirm(`คุณแน่ใจหรือไม่ที่จะโหวตให้เบอร์ ${candidateNo}?`);
+            if(confirmVote) {
+                try {
+                    // อัปเดตสถานะใน Firestore ว่าโหวตแล้ว
+                    await setDoc(doc(db, "users", user.uid), {
+                        hasVoted: true,
+                        votedFor: candidateNo
+                    }, { merge: true });
+                    
+                    alert("บันทึกคะแนนโหวตสำเร็จ!");
+                    disableVoting("คุณได้ทำการลงคะแนนไปแล้ว ขอบคุณครับ!");
+                } catch (error) {
+                    alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message);
+                }
+            }
+        }
+    });
+});
+
+function disableVoting(message) {
+    voteButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.backgroundColor = "#ccc";
+        btn.style.cursor = "not-allowed";
+        btn.innerText = "โหวตแล้ว";
+    });
+    const headerP = document.querySelector('#voting-section .header p');
+    headerP.innerText = message;
+    headerP.style.color = "var(--primary-color)";
+    headerP.style.fontWeight = "bold";
+}
