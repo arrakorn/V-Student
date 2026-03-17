@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบโหวตสภานักเรียน | V-Student</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="auth-container" class="container">
+        <div class="card">
+            <h1 class="title">V-Student 🗳️</h1>
+            <p class="subtitle">ระบบเลือกตั้งสภานักเรียน</p>
+
+            <form id="login-form" class="form-group active">
+                <input type="email" id="login-email" placeholder="อีเมลของคุณ" required>
+                <input type="password" id="login-password" placeholder="รหัสผ่าน" required>
+                <button type="submit" class="btn primary-btn">เข้าสู่ระบบ</button>
+                <p class="switch-text">ยังไม่มีบัญชีใช่ไหม? <span id="show-register">สมัครสมาชิก</span></p>
+            </form>
+
+            <form id="register-form" class="form-group hidden">
+                <input type="email" id="reg-email" placeholder="อีเมลที่ต้องการสมัคร" required>
+                <input type="password" id="reg-password" placeholder="ตั้งรหัสผ่าน (อย่างน้อย 6 ตัว)" required>
+                <button type="submit" class="btn secondary-btn">สมัครสมาชิกเลย!</button>
+                <p class="switch-text">มีบัญชีอยู่แล้ว? <span id="show-login">เข้าสู่ระบบ</span></p>
+            </form>
+            
+            <div id="error-msg" class="error-message"></div>
+        </div>
+    </div>
+
+    <div id="dashboard-container" class="dashboard hidden">
+        <nav class="navbar">
+            <h2>V-Student 🗳️</h2>
+            <button id="logout-btn" class="btn danger-btn">ออกจากระบบ</button>
+        </nav>
+        <main class="main-content">
+            <h3>ยินดีต้อนรับ, <span id="user-display-email"></span></h3>
+            <p>ระบบพร้อมสำหรับการโหวตแล้ว!</p>
+            <div class="candidate-placeholder">
+                <p>🚀 รอเพิ่มข้อมูลผู้สมัครลงคะแนน...</p>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
