@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Vote | สภานักเรียน 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-animate"></div>
+    
+    <div class="container">
+        <div id="auth-card" class="glass-card">
+            <div class="tab-group">
+                <button id="tab-login" class="active" onclick="switchTab('login')">เข้าสู่ระบบ</button>
+                <button id="tab-signup" onclick="switchTab('signup')">ลงทะเบียน</button>
+            </div>
+
+            <div id="login-form">
+                <h1>🗳️ ยินดีต้อนรับ</h1>
+                <p>เข้าสู่ระบบเพื่อใช้สิทธิ์ของคุณ</p>
+                <input type="text" id="login-sid" placeholder="รหัสนักเรียน">
+                <input type="password" id="login-pass" placeholder="รหัสผ่าน">
+                <button class="btn-primary" onclick="handleLogin()">เข้าใช้งาน <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <div id="signup-form" class="hidden">
+                <h1>📝 ลงทะเบียน</h1>
+                <p>สร้างบัญชีผู้ใช้ใหม่สำหรับโหวต</p>
+                <input type="text" id="reg-sid" placeholder="รหัสนักเรียน (เช่น 69xxx)">
+                <input type="text" id="reg-name" placeholder="ชื่อ-นามสกุล">
+                <input type="password" id="reg-pass" placeholder="ตั้งรหัสผ่าน">
+                <button class="btn-secondary" onclick="handleSignUp()">ยืนยันลงทะเบียน</button>
+            </div>
+            <p id="auth-msg" class="msg"></p>
+        </div>
+
+        <div id="vote-card" class="glass-card hidden">
+            <nav class="user-nav">
+                <span id="display-user">สวัสดีคุณ...</span>
+                <button class="btn-logout" onclick="location.reload()">ออกหน้าหลัก</button>
+            </nav>
+            <h2>เลือกเบอร์ที่คุณไว้วางใจ</h2>
+            <div class="candidates-grid">
+                <div class="candidate-item" onclick="selectCandidate(1, 'พรรคก้าวไกลการศึกษา')">
+                    <div class="badge">01</div>
+                    <div class="img-placeholder"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>พรรคก้าวไกลการศึกษา</h3>
+                    <p>นโยบาย: เรียนฟรี มี Wi-Fi แรงทุกห้อง</p>
+                </div>
+                <div class="candidate-item" onclick="selectCandidate(2, 'พรรครวมพลังนักเรียน')">
+                    <div class="badge">02</div>
+                    <div class="img-placeholder"><i class="fas fa-users"></i></div>
+                    <h3>พรรครวมพลังนักเรียน</h3>
+                    <p>นโยบาย: ลดการบ้าน เพิ่มกิจกรรมนันทนาการ</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="finish-card" class="glass-card hidden">
+            <div class="success-animation">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>โหวตสำเร็จ!</h1>
+            <p>คะแนนของคุณถูกบันทึกลงในบล็อกเชน (จำลอง) เรียบร้อยแล้ว</p>
+            <button class="btn-primary" onclick="location.reload()">กลับหน้าแรก</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
