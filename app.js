@@ -156,7 +156,7 @@ btnGoogleLogin.addEventListener("click", () => {
 
   showScreen("loading");
 
-  auth.signInWithPopup(provider).catch((err) => {
+  auth.signInWithRedirect(provider) => {
     console.error("เกิดข้อผิดพลาดในการล็อกอิน:", err);
     showScreen("login");
     showToast("ล็อกอินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", true);
