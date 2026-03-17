@@ -1,14 +1,13 @@
 // Firebase Configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyBALBRccsCoSgadd26glq8kjCVzYVjpRjQ",
-    authDomain: "arakonapp.firebaseapp.com",
-    projectId: "arakonapp",
-    storageBucket: "arakonapp.firebasestorage.app",
-    messagingSenderId: "377162906533",
-    appId: "1:377162906533:web:dcc6197b28cf961431464c",
-    measurementId: "G-WYRJZD0ZMG"
+  apiKey: "AIzaSyBALBRccsCoSgadd26glq8kjCVzYVjpRjQ",
+  authDomain: "arakonapp.firebaseapp.com",
+  projectId: "arakonapp",
+  storageBucket: "arakonapp.firebasestorage.app",
+  messagingSenderId: "377162906533",
+  appId: "1:377162906533:web:bb1ecce0b144bc3c31464c",
+  measurementId: "G-WB3RWJB4DG"
 };
-
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
