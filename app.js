@@ -8,7 +8,7 @@
 //       field: count (number) — จำนวนคะแนนสะสม
 //
 //   collection: "voters"
-//     document: studentId  (เช่น "12345")
+//     document: studentId  (เช่น "ใส่รหัสนักเรียน")
 //       field: partyId (string) — พรรคที่โหวต
 //       field: votedAt (timestamp) — เวลาที่โหวต
 // =========================================================
